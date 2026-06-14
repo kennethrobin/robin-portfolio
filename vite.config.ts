@@ -4,10 +4,10 @@ import { resolve } from 'node:path';
 // Multi-page setup: one entry per creative direction so all three
 // prototypes can be compared live, plus the chooser at "/".
 export default defineConfig({
-  // The project lives in a Dropbox folder; Dropbox locks files while
-  // syncing and breaks Vite's dependency cache (EBUSY). Keeping the
-  // cache outside Dropbox avoids that entirely.
-  cacheDir: 'C:/Users/kenneth/AppData/Local/vite-cache/kr-portfolio',
+  // NOTE: node_modules is flagged "Dropbox-ignored" (an NTFS stream) so
+  // Dropbox no longer syncs/locks it. That keeps Vite's default cache
+  // (node_modules/.vite) safe locally — without hardcoding a machine
+  // path here, which would break the Vercel (Linux) build.
   build: {
     rollupOptions: {
       input: {
