@@ -1,0 +1,378 @@
+/* ============================================================
+   DIRECTION D — "Rōbin"
+   Fullscreen video collage hero + scrollable sales sections.
+   Titles: MNKY Albert.  Body: MNKY Wilson.  Black ground, white type.
+   ============================================================ */
+@import '../styles/tokens.css';
+
+/* ---- MNKY Albert (titles) ---------------------------------- */
+@font-face { font-family: 'MNKY Albert'; src: url('/fonts/MNKYAlbert-Black.otf') format('opentype'); font-weight: 900; font-display: block; }
+@font-face { font-family: 'MNKY Albert'; src: url('/fonts/MNKYAlbert-Extrabold.otf') format('opentype'); font-weight: 800; font-display: swap; }
+@font-face { font-family: 'MNKY Albert'; src: url('/fonts/MNKYAlbert-Bold.otf') format('opentype'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'MNKY Albert'; src: url('/fonts/MNKYAlbert-Semibold.otf') format('opentype'); font-weight: 600; font-display: swap; }
+@font-face { font-family: 'MNKY Albert'; src: url('/fonts/MNKYAlbert-Medium.otf') format('opentype'); font-weight: 500; font-display: swap; }
+
+/* ---- MNKY Wilson (body) ------------------------------------ */
+@font-face { font-family: 'MNKY Wilson'; src: url('/fonts/MNKYWilson-Light.otf') format('opentype'); font-weight: 300; font-display: swap; }
+@font-face { font-family: 'MNKY Wilson'; src: url('/fonts/MNKYWilson-Regular.otf') format('opentype'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'MNKY Wilson'; src: url('/fonts/MNKYWilson-Medium.otf') format('opentype'); font-weight: 500; font-display: swap; }
+@font-face { font-family: 'MNKY Wilson'; src: url('/fonts/MNKYWilson-Semibold.otf') format('opentype'); font-weight: 600; font-display: swap; }
+
+/* ---- Direction-local tokens -------------------------------- */
+body[data-direction='d'] {
+  --font-title: 'MNKY Albert', system-ui, sans-serif;
+  --font-body: 'MNKY Wilson', Georgia, serif;
+  --ground: #050505;
+  --line: rgba(255, 255, 255, 0.16);
+}
+
+/* ---- Reset / page ------------------------------------------ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--ground);
+  color: #fff;
+  /* clip (not hidden) prevents a horizontal scrollbar WITHOUT turning
+     the body into a scroll container — `hidden` here breaks vertical
+     page scrolling entirely. */
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a { color: inherit; text-decoration: none; }
+img { display: block; }
+em { font-style: italic; }
+.muted { color: rgba(255, 255, 255, 0.5); }
+
+:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+.caption {
+  font-family: var(--font-title);
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* ---- Video screen (fixed behind everything) ----------------- */
+.screen {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+/* scrim so white UI reads over bright footage (only matters on hero) */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.4), transparent 20%),
+    linear-gradient(transparent 45%, rgba(0, 0, 0, 0.7));
+}
+
+/* ---- Persistent chrome -------------------------------------- */
+.bar {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--sp-3) var(--page-margin);
+  mix-blend-mode: difference;    /* nav stays legible over light or dark */
+}
+.bar__nav { display: flex; gap: var(--sp-3); }
+.bar__nav a { transition: opacity 0.3s ease; }
+.bar__nav a:hover { opacity: 0.55; }
+
+.moniker {
+  position: fixed;
+  z-index: 30;
+  top: var(--sp-3);
+  left: var(--page-margin);
+  font-family: var(--font-title);
+  font-weight: 900;
+  font-size: clamp(16px, 2.6vw, 48px);
+  line-height: 0.8;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  user-select: none;
+  cursor: pointer;               /* it's the home button now */
+  mix-blend-mode: difference;
+}
+
+/* ---- Hero ---------------------------------------------------- */
+.hero {
+  position: relative;
+  z-index: 2;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;     /* content + strip pack to the bottom */
+  padding: var(--sp-8) var(--page-margin) 0;
+}
+.hero__inner {
+  margin-bottom: var(--sp-8);    /* lift the statement off the filmstrip */
+}
+.hero__kicker { margin-bottom: var(--sp-3); opacity: 0.85; }
+.hero__statement {
+  max-width: 15ch;               /* a tall, punchy left-justified rag */
+  font-family: var(--font-title);
+  font-weight: 900;
+  font-size: clamp(40px, 6.2vw, 112px);
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+/* scroll cue, centered just above the strip */
+.scrollcue {
+  position: absolute;
+  left: 50%;
+  bottom: 124px;
+  transform: translateX(-50%);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+.scrollcue::after {
+  content: '';
+  width: 1px; height: 28px;
+  background: currentColor;
+  animation: cue 1.8s var(--ease-out) infinite;
+  transform-origin: top;
+}
+.scrollcue:hover { opacity: 1; }
+@keyframes cue { 0%,100% { transform: scaleY(0.4); opacity: 0.4; } 50% { transform: scaleY(1); opacity: 1; } }
+
+/* ---- Now playing / tap hint --------------------------------- */
+.nowplaying {
+  position: fixed;
+  z-index: 10;
+  right: var(--page-margin);
+  bottom: 132px;
+  text-align: right;
+  opacity: 0.75;
+  transition: opacity 0.4s ease;
+}
+.nowplaying.is-hidden { opacity: 0; }    /* hidden once hero scrolls away */
+.taphint {
+  position: fixed;
+  z-index: 30;
+  left: 50%;
+  bottom: 132px;
+  transform: translateX(-50%);
+  opacity: 0.85;
+  animation: taphint-pulse 1.6s ease-in-out infinite;
+}
+@keyframes taphint-pulse { 50% { opacity: 0.35; } }
+
+/* ---- Filmstrip (bottom of hero) ----------------------------- */
+.strip {
+  position: relative;
+  z-index: 10;
+  margin-inline: calc(var(--page-margin) * -1);  /* full-bleed */
+  padding: var(--sp-2) 0;
+  border-top: 1px solid var(--line);
+  overflow: hidden;
+  cursor: grab;
+  touch-action: pan-y;           /* let vertical scroll pass through */
+}
+.strip.is-dragging { cursor: grabbing; }
+.strip__track {
+  display: flex;
+  gap: var(--sp-2);
+  width: max-content;
+  will-change: transform;
+  padding-inline: var(--sp-2);
+}
+.strip__item { flex: none; width: 144px; }
+.strip__item img {
+  width: 144px; height: 88px;
+  object-fit: cover;
+  opacity: 0.72;
+  filter: saturate(0.9);
+  transition: opacity 0.35s ease, filter 0.35s ease, transform 0.35s ease;
+}
+.strip__item:hover img,
+.strip__item:focus-visible img { opacity: 1; filter: saturate(1); transform: translateY(-4px); }
+.strip__item .caption {
+  display: block;
+  margin-top: var(--sp-1);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  opacity: 0.6;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ============================================================
+   SALES SECTIONS — solid ground, scroll over the video
+   ============================================================ */
+.sec {
+  position: relative;
+  z-index: 2;
+  background: var(--ground);
+  padding: clamp(80px, 12vh, 160px) var(--page-margin);
+  border-top: 1px solid var(--line);
+}
+.sec__inner {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: var(--grid-gap);
+  row-gap: var(--sp-6);
+  max-width: var(--max-width);
+  margin-inline: auto;
+}
+.sec__label { grid-column: 1 / -1; color: rgba(255,255,255,0.55); }
+.sec__title {
+  grid-column: 1 / 8;
+  font-family: var(--font-title);
+  font-weight: 800;
+  font-size: clamp(30px, 4.4vw, 68px);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+.sec__body {
+  grid-column: 8 / 13;
+  align-self: end;
+  display: grid;
+  gap: var(--sp-3);
+  font-size: clamp(16px, 1.25vw, 20px);
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.82);
+  font-weight: 400;
+}
+.sec__body em { color: #fff; font-style: italic; }
+.sec__body--lead {
+  grid-column: 8 / 13;
+  font-size: clamp(18px, 1.5vw, 24px);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* §02 capabilities list */
+.caps {
+  grid-column: 1 / -1;
+  margin-top: var(--sp-4);
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--line);          /* hairline grid via gaps */
+  border: 1px solid var(--line);
+}
+.cap {
+  background: var(--ground);
+  padding: var(--sp-5) var(--sp-4) var(--sp-6);
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  transition: background 0.4s var(--ease-out);
+}
+.cap:hover { background: #0d0d0f; }
+.cap__name {
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: clamp(19px, 1.6vw, 24px);
+  letter-spacing: -0.01em;
+}
+.cap__desc {
+  font-size: 15px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.62);
+  max-width: 34ch;
+}
+
+/* §03 client list — big editorial wrap */
+.clients {
+  list-style: none;
+  max-width: var(--max-width);
+  margin: var(--sp-10) auto 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-6);
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: clamp(28px, 4.6vw, 76px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+.clients li { color: rgba(255, 255, 255, 0.42); transition: color 0.3s ease; }
+.clients li:hover { color: #fff; }
+
+/* ---- Footer -------------------------------------------------- */
+.footer {
+  position: relative;
+  z-index: 2;
+  background: var(--ground);
+  border-top: 1px solid var(--line);
+  padding: clamp(80px, 12vh, 160px) var(--page-margin) var(--sp-6);
+}
+.footer__kicker { color: rgba(255,255,255,0.55); margin-bottom: var(--sp-4); }
+.footer__mail {
+  display: block;
+  max-width: 18ch;
+  font-family: var(--font-title);
+  font-weight: 800;
+  font-size: clamp(40px, 8vw, 132px);
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+  transition: opacity 0.3s ease;
+}
+.footer__mail:hover { opacity: 0.6; }
+.footer__cols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-6);
+  margin-top: clamp(64px, 10vh, 128px);
+  padding-top: var(--sp-5);
+  border-top: 1px solid var(--line);
+}
+.footer__col { display: grid; gap: var(--sp-1); align-content: start; font-size: 15px; }
+.footer__col a { color: rgba(255,255,255,0.82); transition: color 0.3s ease; }
+.footer__col a:hover { color: #fff; }
+.footer__h { color: rgba(255,255,255,0.45); margin-bottom: var(--sp-1); }
+.footer__col--end { align-content: space-between; justify-items: end; text-align: right; }
+.footer__copy { margin-top: var(--sp-4); }
+
+/* ---- Scroll-reveal initial state (JS animates to visible) ----- */
+[data-reveal] .sec__label,
+[data-reveal] .sec__title,
+[data-reveal] .sec__body,
+[data-reveal] .caps,
+[data-reveal] .clients { will-change: transform, opacity; }
+
+/* ---- Mobile -------------------------------------------------- */
+@media (max-width: 860px) {
+  .sec__title { grid-column: 1 / -1; }
+  .sec__body, .sec__body--lead { grid-column: 1 / -1; }
+  .caps { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+  .nowplaying { display: none; }
+  .hero__inner { max-width: 12ch; padding-top: 22vh; }
+  .strip__item { width: 116px; }
+  .strip__item img { width: 116px; height: 72px; }
+  .caps { grid-template-columns: 1fr; }
+  .footer__cols { grid-template-columns: 1fr; gap: var(--sp-5); }
+  .footer__col--end { justify-items: start; text-align: left; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .strip__item img { transition: none; }
+  .scrollcue::after { animation: none; }
+}

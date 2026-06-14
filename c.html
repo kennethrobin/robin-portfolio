@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kenneth Robin — Creative Direction &amp; Design</title>
+  <meta name="description" content="Kenneth Robin is a creative director and motion designer in Los Angeles." />
+</head>
+<body data-direction="c">
+  <a class="skip-link caption" href="#work">Skip to work</a>
+
+  <!-- ====== Masthead (A's clarity) ====== -->
+  <header class="masthead page" id="top">
+    <a class="masthead__name" data-moniker href="/d.html" aria-label="Rōbin — home">Rōbin</a>
+    <nav class="masthead__nav caption" aria-label="Primary">
+      <a href="#work">Work</a>
+      <a href="mailto:hello@kennethrobin.la">Contact</a>
+    </nav>
+  </header>
+
+  <div class="wrap" data-wrap>
+    <main>
+      <!-- ====== Landing ====== -->
+      <section class="hero page" aria-label="Introduction">
+        <h1 class="display" data-split>Creative direction &amp; design for motion.</h1>
+        <p class="hero__sub caption muted" data-clients></p>
+      </section>
+
+      <!-- ====== Editorial index with visible media ====== -->
+      <section class="index page" id="work" aria-label="Selected work">
+        <ol class="index__list grid" data-index></ol>
+      </section>
+
+      <footer class="outro page">
+        <a class="outro__mail h2" href="mailto:hello@kennethrobin.la">hello@kennethrobin.la</a>
+        <p class="caption muted">Kenneth Robin · Creative Direction &amp; Design · Los Angeles</p>
+      </footer>
+    </main>
+  </div>
+
+  <!-- WebGL layer: idle until a project opens, then the thumbnail
+       lifts off the page into a full-bleed spatial view -->
+  <div class="veil" data-veil aria-hidden="true"></div>
+  <canvas class="stage" data-stage aria-hidden="true"></canvas>
+
+  <!-- ====== Spatial detail view (DOM copy over the plane) ====== -->
+  <section class="detail" data-detail hidden aria-label="Project detail">
+    <button class="detail__back caption" data-back>← Index</button>
+    <div class="detail__copy page">
+      <h2 class="detail__title h2" data-d-title></h2>
+      <p class="detail__meta caption muted" data-d-meta></p>
+      <p class="detail__blurb" data-d-blurb></p>
+      <div class="detail__nav caption">
+        <button data-prev>← Prev</button>
+        <button data-next>Next →</button>
+      </div>
+    </div>
+  </section>
+
+  <script type="module" src="/src/c/main.ts"></script>
+</body>
+</html>

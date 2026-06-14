@@ -1,0 +1,156 @@
+/* ============================================================
+   DIRECTION C — Hybrid
+   Editorial index (light ground) → spatial detail (dark ground).
+   ============================================================ */
+@import '../styles/base.css';
+
+.skip-link {
+  position: fixed;
+  top: var(--sp-1);
+  left: var(--sp-1);
+  z-index: 60;
+  padding: var(--sp-1) var(--sp-2);
+  background: var(--ink);
+  color: var(--paper);
+  transform: translateY(-200%);
+}
+.skip-link:focus-visible { transform: none; }
+
+/* ---- Masthead ------------------------------------------------ */
+.masthead {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--sp-7);
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--hairline);
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+/* the Rōbin wordmark, sitting in the masthead (home button) */
+.masthead__name {
+  font-family: 'MNKY Albert', system-ui, sans-serif;
+  font-weight: 900;
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+}
+.masthead__nav { display: flex; gap: var(--sp-4); }
+body.is-detail .masthead { opacity: 0; pointer-events: none; }
+
+/* ---- Hero ----------------------------------------------------- */
+.hero {
+  padding-top: calc(var(--sp-16) + var(--sp-7));
+  padding-bottom: var(--sp-12);
+}
+.hero .display { max-width: 18ch; }
+.hero__sub { margin-top: var(--sp-6); }
+
+/* ---- Editorial index with inline media ------------------------ */
+.index { padding-bottom: var(--sp-12); }
+.index__list { row-gap: var(--sp-12); }
+
+.card { grid-column: span 12; }
+/* alternating editorial rhythm: wide / narrow on the 12-col grid */
+.card:nth-child(odd)  { grid-column: 1 / 8; }
+.card:nth-child(even) { grid-column: 6 / 13; margin-top: var(--sp-10); }
+
+.card a { display: block; }
+.card__media {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  background: var(--ink);
+}
+.card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.2s var(--ease-out);
+}
+.card a:hover .card__media img,
+.card a:focus-visible .card__media img { transform: scale(1.04); }
+.card__meta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  margin-top: var(--sp-2);
+}
+.card__title {
+  font-size: var(--text-h2-size);
+  line-height: var(--text-h2-leading);
+  letter-spacing: var(--text-h2-tracking);
+  font-weight: 550;
+}
+/* the media is hidden the instant its WebGL twin takes over */
+.card.is-lifted .card__media img { opacity: 0; }
+
+/* ---- Outro ----------------------------------------------------- */
+.outro {
+  padding-block: var(--sp-12);
+  border-top: 1px solid var(--ink);
+  display: grid;
+  gap: var(--sp-8);
+}
+.outro__mail:hover { color: var(--accent); }
+
+/* ---- WebGL layer + dark veil ----------------------------------- */
+.stage {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;     /* the DOM stays interactive beneath */
+}
+.veil {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: var(--paper-inv);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---- Spatial detail view ---------------------------------------- */
+.detail {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  color: var(--ink-inv);
+  pointer-events: none;       /* buttons re-enable themselves */
+}
+.detail__back {
+  position: fixed;
+  top: var(--sp-2);
+  left: var(--page-margin);
+  padding: var(--sp-1) var(--sp-2);
+  color: var(--ink-inv);
+  pointer-events: auto;
+}
+.detail__copy {
+  position: absolute;
+  inset-inline: 0;
+  /* sits under the hero plane; the plane's target rect is computed
+     in JS to land just above this line — both on the 8pt grid */
+  top: calc(56vh + var(--sp-6));
+  pointer-events: auto;
+}
+.detail__meta { margin-top: var(--sp-1); }
+.detail__blurb { max-width: 52ch; margin-top: var(--sp-3); color: var(--muted-inv); }
+.detail__nav {
+  display: flex;
+  gap: var(--sp-4);
+  margin-top: var(--sp-5);
+}
+.detail__nav button { padding: var(--sp-1) 0; color: var(--ink-inv); }
+.detail__nav button:hover { color: var(--accent); }
+
+/* ---- Mobile ------------------------------------------------------ */
+@media (max-width: 760px) {
+  .card:nth-child(odd), .card:nth-child(even) { grid-column: 1 / 13; margin-top: 0; }
+  .detail__copy { top: calc(48vh + var(--sp-4)); }
+}

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kenneth Robin — Creative Direction &amp; Design</title>
+  <meta name="description" content="Kenneth Robin is a creative director and motion designer in Los Angeles." />
+</head>
+<body data-direction="a">
+  <a class="skip-link caption" href="#work">Skip to work</a>
+
+  <!-- ====== Masthead: persistent, visible, structural ====== -->
+  <header class="masthead page" id="top">
+    <a class="masthead__name" data-moniker href="/d.html" aria-label="Rōbin — home">Rōbin</a>
+    <nav class="masthead__nav caption" aria-label="Primary">
+      <a href="#work">Work</a>
+      <a href="#about">About</a>
+      <a href="mailto:hello@kennethrobin.la">Contact</a>
+    </nav>
+    <span class="masthead__loc caption muted">Los Angeles&ensp;<span data-clock>00:00</span></span>
+  </header>
+
+  <main>
+    <!-- ====== Landing statement ====== -->
+    <section class="hero page" aria-label="Introduction">
+      <div class="grid">
+        <h1 class="hero__statement display" data-split>Creative direction &amp; design for motion.</h1>
+        <p class="hero__clients caption muted" data-clients></p>
+        <p class="hero__cue caption muted" aria-hidden="true">Selected work ↓</p>
+      </div>
+    </section>
+
+    <!-- ====== Work index: the heart of the site ====== -->
+    <section class="index page" id="work" aria-label="Selected work">
+      <div class="index__head caption muted" aria-hidden="true">
+        <span>No.</span><span>Project</span><span>Client</span><span>Year</span><span class="index__role">Role</span>
+      </div>
+      <ol class="index__list" data-index></ol>
+    </section>
+
+    <!-- ====== About / contact footer ====== -->
+    <section class="outro page" id="about" aria-label="About and contact">
+      <div class="grid">
+        <p class="outro__bio" data-bio></p>
+        <a class="outro__mail h2" href="mailto:hello@kennethrobin.la">hello@kennethrobin.la</a>
+        <p class="outro__fine caption muted">Kenneth Robin · Creative Direction &amp; Design · Los Angeles</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Cursor-following work preview (motion-forward hover) -->
+  <div class="preview" data-preview aria-hidden="true"><img alt="" /></div>
+
+  <!-- Project quick-view overlay -->
+  <div class="sheet" data-sheet hidden>
+    <button class="sheet__close caption" data-sheet-close>Close ✕</button>
+    <div class="sheet__inner page"></div>
+  </div>
+
+  <script type="module" src="/src/a/main.ts"></script>
+</body>
+</html>

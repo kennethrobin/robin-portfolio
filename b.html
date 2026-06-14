@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kenneth Robin — Creative Direction &amp; Design</title>
+  <meta name="description" content="Kenneth Robin is a creative director and motion designer in Los Angeles." />
+</head>
+<body data-direction="b">
+  <!-- WebGL: the work floats in depth; scrolling moves the camera through it -->
+  <canvas class="stage" data-stage aria-hidden="true"></canvas>
+
+  <!-- Quiet UI: fades while you travel, returns when you settle -->
+  <header class="ui ui--top page">
+    <a class="ui__home" data-moniker data-home href="/d.html" aria-label="Rōbin — home">Rōbin</a>
+    <span class="caption muted" data-counter>01 / 00</span>
+  </header>
+
+  <div class="ui ui--label page" aria-live="polite">
+    <h1 class="label__title h2" data-label-title></h1>
+    <p class="label__meta caption muted" data-label-meta></p>
+  </div>
+
+  <footer class="ui ui--bottom page">
+    <span class="caption muted" data-cue>Scroll to travel</span>
+    <a class="caption" href="mailto:hello@kennethrobin.la">hello@kennethrobin.la</a>
+  </footer>
+
+  <!-- Accessible fallback list of the same work (also for reduced-motion) -->
+  <nav class="fallback page" data-fallback aria-label="Selected work">
+    <ol></ol>
+  </nav>
+
+  <!-- Project quick-view -->
+  <div class="sheet" data-sheet hidden>
+    <button class="sheet__close caption" data-sheet-close>Close ✕</button>
+    <div class="sheet__inner page"></div>
+  </div>
+
+  <script type="module" src="/src/b/main.ts"></script>
+</body>
+</html>

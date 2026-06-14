@@ -1,0 +1,200 @@
+/* ============================================================
+   DIRECTION A — Editorial / interface-forward
+   Visible masthead, structured labeled index, grid on display.
+   ============================================================ */
+@import '../styles/base.css';
+
+.skip-link {
+  position: fixed;
+  top: var(--sp-1);
+  left: var(--sp-1);
+  z-index: 30;
+  padding: var(--sp-1) var(--sp-2);
+  background: var(--ink);
+  color: var(--paper);
+  transform: translateY(-200%);
+}
+.skip-link:focus-visible { transform: none; }
+
+/* ---- Masthead ---------------------------------------------- */
+.masthead {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--sp-7);                 /* 56px */
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--hairline);
+}
+/* the Rōbin wordmark, sitting in the masthead (home button) */
+.masthead__name {
+  font-family: 'MNKY Albert', system-ui, sans-serif;
+  font-weight: 900;
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+}
+.masthead__nav { display: flex; gap: var(--sp-4); }
+.masthead__nav a { position: relative; padding-block: var(--sp-05); }
+.masthead__nav a::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 100%; height: 1px;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.masthead__nav a:hover::after { transform: scaleX(1); transform-origin: left; }
+.masthead__loc { font-variant-numeric: tabular-nums; }
+
+/* ---- Hero --------------------------------------------------- */
+.hero {
+  padding-top: calc(var(--sp-16) + var(--sp-7));   /* clears masthead */
+  padding-bottom: var(--sp-12);
+  /* the 12-col grid made faintly visible — systems rigor on display */
+  background-image: repeating-linear-gradient(
+    to right,
+    transparent 0,
+    transparent calc((100% - 11 * var(--grid-gap)) / 12),
+    var(--hairline) calc((100% - 11 * var(--grid-gap)) / 12),
+    var(--hairline) calc((100% - 11 * var(--grid-gap)) / 12 + 1px),
+    transparent calc((100% - 11 * var(--grid-gap)) / 12 + 1px),
+    transparent calc((100% - 11 * var(--grid-gap)) / 12 + var(--grid-gap))
+  );
+  background-clip: content-box;
+}
+.hero__statement { grid-column: 1 / 11; max-width: 18ch; }
+.hero__clients {
+  grid-column: 1 / 8;
+  margin-top: var(--sp-8);
+}
+.hero__cue {
+  grid-column: 11 / 13;
+  margin-top: var(--sp-8);
+  justify-self: end;
+  align-self: end;
+}
+
+/* ---- Work index --------------------------------------------- */
+.index { padding-bottom: var(--sp-12); }
+
+.index__head,
+.index__row {
+  display: grid;
+  grid-template-columns: var(--sp-7) 1fr 1fr 5rem 1fr;
+  column-gap: var(--grid-gap);
+  align-items: baseline;
+}
+.index__head {
+  padding-bottom: var(--sp-1);
+  border-bottom: 1px solid var(--ink);
+}
+.index__row {
+  position: relative;
+  padding-block: var(--sp-3);
+  border-bottom: 1px solid var(--hairline);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.index__row .index__title {
+  font-size: var(--text-h2-size);
+  line-height: var(--text-h2-leading);
+  letter-spacing: var(--text-h2-tracking);
+  font-weight: 550;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.index__row:hover .index__title,
+.index__row:focus-visible .index__title { transform: translateX(var(--sp-2)); }
+.index__row:hover .index__no,
+.index__row:focus-visible .index__no { color: var(--accent); }
+.index__no, .index__client, .index__year, .index__role {
+  font-size: var(--text-caption-size);
+  line-height: var(--text-caption-leading);
+  letter-spacing: var(--text-caption-tracking);
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+/* ---- Cursor-following preview ------------------------------- */
+.preview {
+  position: fixed;
+  z-index: 10;
+  top: 0; left: 0;
+  width: 320px;
+  aspect-ratio: 16 / 10;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+  /* anchored at its centre by GSAP transforms */
+}
+.preview img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ---- Outro --------------------------------------------------- */
+.outro {
+  padding-block: var(--sp-16);
+  border-top: 1px solid var(--ink);
+}
+.outro__bio { grid-column: 1 / 7; max-width: 52ch; }
+.outro__mail {
+  grid-column: 1 / 13;
+  margin-top: var(--sp-10);
+  justify-self: start;
+}
+.outro__mail:hover { color: var(--accent); }
+.outro__fine { grid-column: 1 / 13; margin-top: var(--sp-12); }
+
+/* ---- Quick-view sheet ---------------------------------------- */
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: var(--paper-inv);
+  color: var(--ink-inv);
+  overflow-y: auto;
+}
+.sheet__close {
+  position: fixed;
+  top: var(--sp-2);
+  right: var(--page-margin);
+  z-index: 41;
+  padding: var(--sp-1) var(--sp-2);
+  color: var(--ink-inv);
+}
+.sheet__inner { padding-block: var(--sp-12); }
+.sheet__media { width: 100%; margin-bottom: var(--sp-4); }
+.sheet__media img { width: 100%; height: auto; }
+.sheet__video {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  margin-bottom: var(--sp-4);
+}
+.sheet__meta {
+  display: flex;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-2);
+  color: var(--muted-inv);
+}
+.sheet__blurb { max-width: 52ch; margin-top: var(--sp-2); }
+
+/* ---- Mobile -------------------------------------------------- */
+@media (max-width: 760px) {
+  .masthead__loc { display: none; }
+  .hero { padding-top: calc(var(--sp-12) + var(--sp-7)); }
+  .hero__statement { grid-column: 1 / 13; }
+  .hero__clients { grid-column: 1 / 13; }
+  .hero__cue { display: none; }
+  .index__head { grid-template-columns: var(--sp-5) 1fr 4rem; }
+  .index__head .index__role, .index__head span:nth-child(3) { display: none; }
+  .index__row { grid-template-columns: var(--sp-5) 1fr 4rem; }
+  .index__row .index__client, .index__row .index__role { display: none; }
+  .preview { display: none; }    /* no cursor on touch — rows link straight in */
+  .outro__bio { grid-column: 1 / 13; }
+}

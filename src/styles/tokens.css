@@ -1,0 +1,66 @@
+/* ============================================================
+   DESIGN TOKENS — the whole look lives here.
+   Edit these and every page follows. Nothing in the site uses
+   a raw pixel value for spacing/type; it all points back here.
+   ============================================================ */
+
+:root {
+  /* ---- Spacing — 8pt grid ----------------------------------
+     Every margin / padding / gap on the site is one of these.
+     --sp-05 (4px) exists only for fine optical nudges.        */
+  --sp-05: 4px;
+  --sp-1: 8px;
+  --sp-2: 16px;
+  --sp-3: 24px;
+  --sp-4: 32px;
+  --sp-5: 40px;
+  --sp-6: 48px;
+  --sp-7: 56px;
+  --sp-8: 64px;
+  --sp-9: 72px;
+  --sp-10: 80px;
+  --sp-12: 96px;
+  --sp-16: 128px;
+
+  /* ---- Layout ---------------------------------------------- */
+  --page-margin: clamp(16px, 4vw, 64px); /* outer gutter, snaps near 8pt */
+  --grid-gap: var(--sp-3);               /* 12-col grid gutter */
+  --max-width: 1680px;
+
+  /* ---- Type scale (line-heights resolve to the 4pt grid) ---- */
+  --font-sans: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+
+  --text-display-size: clamp(40px, 6.5vw, 88px);
+  --text-display-leading: 1.05;          /* tight, statement setting */
+  --text-display-tracking: -0.03em;
+
+  --text-h2-size: clamp(24px, 2.5vw, 32px);
+  --text-h2-leading: 1.25;               /* 32 -> 40px = 4pt grid */
+  --text-h2-tracking: -0.015em;
+
+  --text-body-size: 16px;
+  --text-body-leading: 1.625;            /* 26px on the 4pt grid */
+
+  --text-caption-size: 12px;
+  --text-caption-leading: 1.3333;        /* 16px */
+  --text-caption-tracking: 0.06em;       /* slightly looser, all-caps meta */
+
+  /* ---- Palette — restrained monochrome + one quiet accent --- */
+  --ink: #111114;          /* near-black */
+  --paper: #f4f3f0;        /* warm off-white */
+  --muted: #8a8a90;        /* secondary text */
+  --hairline: rgba(17, 17, 20, 0.14);
+  --accent: #e84b1c;       /* the one allowed color — used sparingly */
+
+  /* Dark-ground variants (directions B/C detail views) */
+  --ink-inv: #ecebe8;
+  --paper-inv: #0c0c0e;
+  --muted-inv: #76767c;
+  --hairline-inv: rgba(236, 235, 232, 0.16);
+
+  /* ---- Motion ----------------------------------------------
+     One easing family site-wide so everything feels related.  */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);   /* "expo-ish" decel */
+  --dur-fast: 0.4s;
+  --dur-slow: 0.9s;
+}

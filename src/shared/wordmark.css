@@ -1,0 +1,25 @@
+/* ============================================================
+   Shared "Rōbin" wordmark — font + per-letter behaviour.
+   Each page positions and sizes `.wordmark` itself; this file only
+   provides the typeface and the inline-block letters that the idle
+   GSAP motion animates.
+   ============================================================ */
+@font-face {
+  font-family: 'MNKY Albert';
+  src: url('/fonts/MNKYAlbert-Black.otf') format('opentype');
+  font-weight: 900;
+  font-display: block;
+}
+
+.wordmark {
+  font-family: 'MNKY Albert', system-ui, sans-serif;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  user-select: none;
+}
+.wordmark__ltr {
+  display: inline-block;
+  will-change: transform;
+  transform-origin: 50% 65%;
+}
