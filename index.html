@@ -3,53 +3,169 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kenneth Robin — Direction Prototypes</title>
-  <script type="module">
-    import '@fontsource-variable/inter';
-    import './src/styles/base.css';
-  </script>
-  <style>
-    body { display: grid; place-items: center; min-height: 100vh; }
-    .chooser { width: min(720px, 90vw); padding-block: 96px; }
-    .chooser h1 { margin-bottom: 8px; }
-    .chooser > p { margin-bottom: 64px; max-width: 48ch; }
-    .chooser ol { display: grid; gap: 0; border-top: 1px solid var(--hairline); }
-    .chooser a {
-      display: grid; grid-template-columns: 56px 1fr auto; align-items: baseline;
-      gap: 24px; padding: 24px 8px; border-bottom: 1px solid var(--hairline);
-      transition: background 0.3s var(--ease-out), padding-left 0.3s var(--ease-out);
-    }
-    .chooser a:hover { background: rgba(17,17,20,0.04); padding-left: 16px; }
-    .chooser .which { font-size: 24px; font-weight: 550; letter-spacing: -0.01em; }
-    .chooser .what { color: var(--muted); font-size: 14px; }
-  </style>
+  <title>Rōbin — Creative Direction &amp; Motion Design</title>
+  <meta name="description" content="Kenneth Robin — creative direction and motion design for ambitious brands. Los Angeles." />
+  <link rel="preload" href="/fonts/MNKYAlbert-Black.otf" as="font" type="font/otf" crossorigin />
 </head>
-<body>
-  <main class="chooser">
-    <h1 class="h2">Kenneth Robin — portfolio directions</h1>
-    <p class="muted">Three working prototypes of the same content. Open each, judge the feel, pick one to take to completion.</p>
-    <ol>
-      <li><a href="/a.html">
-        <span class="caption muted">A</span>
-        <span class="which">Editorial</span>
-        <span class="what">visible interface · structured index</span>
-      </a></li>
-      <li><a href="/b.html">
-        <span class="caption muted">B</span>
-        <span class="which">Dimensional</span>
-        <span class="what">work planes in depth · quiet UI</span>
-      </a></li>
-      <li><a href="/c.html">
-        <span class="caption muted">C</span>
-        <span class="which">Hybrid</span>
-        <span class="what">editorial index → spatial detail</span>
-      </a></li>
-      <li><a href="/d.html">
-        <span class="caption muted">D</span>
-        <span class="which">Rōbin</span>
-        <span class="what">fullscreen video collage · random cuts · filmstrip</span>
-      </a></li>
-    </ol>
+<body data-direction="d">
+  <!-- Fullscreen WebGL video collage: random ~3s cuts across all films.
+       Sits fixed behind the hero; the solid sections scroll over it. -->
+  <canvas class="screen" data-screen aria-hidden="true"></canvas>
+
+  <!-- Persistent chrome ------------------------------------------------ -->
+  <header class="bar">
+    <nav class="bar__nav caption" aria-label="Primary">
+      <a href="#profile">Studio</a>
+      <a href="#contact">Contact</a>
+      <a href="/a.html">Work</a>
+    </nav>
+  </header>
+
+  <!-- Logo / moniker (top-left) — also the home button -->
+  <a class="moniker" data-moniker href="#top" aria-label="Rōbin — back to top">Rōbin</a>
+
+  <!-- Floating video labels -->
+  <p class="nowplaying caption" data-nowplaying aria-live="off"></p>
+  <p class="taphint caption" data-taphint hidden>Tap to play</p>
+
+  <main>
+    <!-- ============================================================
+         HERO — the statement, over the reel
+         Edit the headline + kicker text right here.
+         ============================================================ -->
+    <section class="hero" id="top">
+      <div class="hero__inner">
+        <p class="hero__kicker caption">Creative Director · Motion Designer — Los Angeles</p>
+        <h1 class="hero__statement">
+          Creative direction for ambitious brands.
+        </h1>
+      </div>
+
+      <!-- Filmstrip: drag or let it drift -->
+      <nav class="strip" data-strip aria-label="Selected work">
+        <div class="strip__track" data-track></div>
+      </nav>
+
+      <a class="scrollcue caption" href="#profile" aria-label="Scroll to read more">
+        <span>Scroll</span>
+      </a>
+    </section>
+
+    <!-- ============================================================
+         §01 PROFILE — who I am + the promise
+         ============================================================ -->
+    <section class="sec" id="profile" data-reveal>
+      <div class="sec__inner">
+        <p class="sec__label caption">01 — Profile</p>
+        <h2 class="sec__title">
+          Brands and agencies hire me when the work has to land.
+        </h2>
+        <div class="sec__body">
+          <p>
+            I’m Kenneth Robin, a creative director and motion designer in
+            Los&nbsp;Angeles. For over a decade I’ve helped brands — and the
+            agencies behind them — turn strategy into motion: brand films,
+            broadcast identities, title sequences and launch campaigns that
+            earn attention and keep it.
+          </p>
+          <p>
+            I direct <em>and</em> design, from first concept to final frame, so
+            the idea that wins the room is the idea that ships — with nothing
+            lost in the handoff.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         §02 CAPABILITIES — how to hire me
+         Add / edit services in the list below.
+         ============================================================ -->
+    <section class="sec" id="capabilities" data-reveal>
+      <div class="sec__inner">
+        <p class="sec__label caption">02 — Capabilities</p>
+        <h2 class="sec__title">One director,<br />every stage of the work.</h2>
+        <ol class="caps">
+          <li class="cap">
+            <h3 class="cap__name">Creative Direction</h3>
+            <p class="cap__desc">Concept, narrative and look — leading campaigns and films from first idea to delivery.</p>
+          </li>
+          <li class="cap">
+            <h3 class="cap__name">Motion Design &amp; Animation</h3>
+            <p class="cap__desc">Design-led motion for broadcast, film and digital, built to scale across a whole system.</p>
+          </li>
+          <li class="cap">
+            <h3 class="cap__name">3D &amp; CG</h3>
+            <p class="cap__desc">Photoreal and stylized CG for product, automotive and the abstract.</p>
+          </li>
+          <li class="cap">
+            <h3 class="cap__name">Brand &amp; Broadcast Identity</h3>
+            <p class="cap__desc">Idents, packaging and motion systems that hold up everywhere they run.</p>
+          </li>
+          <li class="cap">
+            <h3 class="cap__name">Art Direction</h3>
+            <p class="cap__desc">Style frames and a visual language that set the tone before a single frame moves.</p>
+          </li>
+          <li class="cap">
+            <h3 class="cap__name">Film &amp; Title Design</h3>
+            <p class="cap__desc">Directing live-action and CG — from boards and previs through to the final grade.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         §03 CLIENTS — proof
+         Edit the client names in the list below.
+         ============================================================ -->
+    <section class="sec" id="clients" data-reveal>
+      <div class="sec__inner">
+        <p class="sec__label caption">03 — Selected clients</p>
+        <h2 class="sec__title">In good company.</h2>
+        <p class="sec__body sec__body--lead">
+          From global launches to single films, I’ve delivered at every scale —
+          across automotive, broadcast, sport, music and technology.
+        </p>
+      </div>
+      <ul class="clients" aria-label="Selected clients">
+        <li>BMW</li><li>BBC</li><li>Al Jazeera</li><li>Xbox</li>
+        <li>Spotify</li><li>Squarespace</li><li>AT&amp;T</li><li>Audi</li>
+        <li>Samsung</li><li>Nike</li><li>Jordan Brand</li><li>Hulu</li>
+        <li>Casio</li><li>Dodge</li><li>Warner Media</li><li>Faraday</li>
+      </ul>
+    </section>
+
+    <!-- ============================================================
+         FOOTER — the CTA
+         ============================================================ -->
+    <footer class="footer" id="contact">
+      <div class="footer__cta">
+        <p class="footer__kicker caption">Available for direction &amp; freelance</p>
+        <a class="footer__mail" href="mailto:hello@kennethrobin.la">
+          Have something ambitious in&nbsp;mind?
+        </a>
+      </div>
+      <div class="footer__cols">
+        <div class="footer__col">
+          <p class="caption footer__h">Contact</p>
+          <a href="mailto:hello@kennethrobin.la">hello@kennethrobin.la</a>
+          <p class="muted">Los Angeles, CA</p>
+        </div>
+        <div class="footer__col">
+          <p class="caption footer__h">Elsewhere</p>
+          <!-- swap in your real links -->
+          <a href="#" rel="noopener">Instagram</a>
+          <a href="#" rel="noopener">Vimeo</a>
+          <a href="#" rel="noopener">LinkedIn</a>
+        </div>
+        <div class="footer__col footer__col--end">
+          <a class="footer__top caption" href="#top">Back to top ↑</a>
+          <p class="muted footer__copy">© 2026 Kenneth Robin</p>
+        </div>
+      </div>
+    </footer>
   </main>
+
+  <script type="module" src="/src/d/main.ts"></script>
 </body>
 </html>
