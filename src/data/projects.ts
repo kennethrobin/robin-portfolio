@@ -46,7 +46,7 @@ export const projects: Project[] = [
     year: '2021',
     role: 'Creative Direction, Design',
     blurb:
-      'Large-format motion pieces for the AT&T Discovery District in downtown Dallas — fluid, sculptural forms built for a 104-foot media wall.',
+      'Experiential content for the large-format media wall at AT&T’s headquarters in Dallas, where people gather to watch games and spend time in the outdoor plaza. As one of the first artists commissioned for the screen, I designed a world of bioluminescent deep-sea species — a celebration of diversity. I developed the look through extensive animation and material tests, then built each creature, rigged and hand-detailed inside and out, to reward a close look at every layer. Experience design — motion as part of a place, not just a screen.',
     media: m('att-discovery-district', 5),
     video: 'https://player.vimeo.com/video/533794229',
     tone: '#0a1a2e',
@@ -160,7 +160,8 @@ export const site = {
   statement: 'Creative direction & design for motion.',
   sub: 'Los Angeles',
   email: 'hello@kennethrobin.la',
-  clients: 'BMW · BBC · Al Jazeera · Xbox · Squarespace · Spotify · AT&T · Jordan Brand · Faraday',
+  // Names only — keep this ruthlessly true. Add a name only once it's confirmed.
+  clients: 'BMW · BBC · Al Jazeera · Xbox · Squarespace · AT&T · Hulu · Faraday · M83 · FootJoy · Dodge · Samsung · AIGA',
   about:
-    'Kenneth Robin is a creative director and motion designer in Los Angeles. He directs and designs film, brand and spatial work for clients across automotive, broadcast, music and technology.',
+    'Kenneth Robin is a creative director and motion designer based in Los Angeles, working across film, broadcast design, 3D, and large-scale experiences. I bring a strong point of view and the craft to back it — concepting ambitious work and, when it doesn’t exist yet, inventing the technique to make it real. For over a decade I’ve made that work for global brands and artists who’d rather do something singular than something safe.',
 };

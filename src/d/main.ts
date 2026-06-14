@@ -19,11 +19,8 @@
 import './d.css';
 import * as THREE from 'three';
 import gsap from 'gsap';
-import ScrollTrigger from 'gsap/ScrollTrigger';
-import { projects } from '../data/projects';
+import { projects, site, type Project } from '../data/projects';
 import { initWordmark } from '../shared/wordmark';
-
-gsap.registerPlugin(ScrollTrigger);
 
 /* ---- The films ------------------------------------------------ */
 const SOURCES = [
@@ -171,7 +168,6 @@ gsap.ticker.add(() => {
 });
 
 /* ---- The cut scheduler ------------------------------------------ */
-const nowPlaying = document.querySelector<HTMLElement>('[data-nowplaying]')!;
 let current: Film | null = null;
 
 const aspectOf = (f: Film) =>
@@ -207,13 +203,6 @@ function pickNext(): Film {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-function setNowPlaying(label: string) {
-  gsap.timeline()
-    .to(nowPlaying, { opacity: 0, duration: 0.2, ease: 'power2.in' })
-    .add(() => { nowPlaying.textContent = label; })
-    .to(nowPlaying, { opacity: 0.75, duration: 0.4, ease: 'power2.out' });
-}
-
 async function firstFrame() {
   const f = films[Math.floor(Math.random() * films.length)];
   await prepare(f);
@@ -221,7 +210,6 @@ async function firstFrame() {
   uniforms.uFrom.value = f.tex;
   uniforms.uTo.value = f.tex;
   uniforms.uAspectFrom.value = uniforms.uAspectTo.value = aspectOf(f);
-  setNowPlaying(f.label);
 }
 
 async function cut() {
@@ -231,7 +219,6 @@ async function cut() {
   uniforms.uTo.value = next.tex;
   uniforms.uAspectTo.value = aspectOf(next);
   uniforms.uSeed.value = Math.random() * 100;
-  setNowPlaying(next.label);
 
   await new Promise<void>((resolve) => {
     gsap.timeline({ onComplete: resolve })
@@ -289,75 +276,103 @@ run();
 /* ---- Wordmark (home button + idle motion) ----------------------- */
 initWordmark(document.querySelector<HTMLElement>('[data-moniker]')!);
 if (!reducedMotion) {
-  gsap.from('.bar, .nowplaying, .strip', {
+  // hero is just the reel now — fade in the nav. (The scroll cue keeps
+  // its own faint CSS opacity; a gsap.from would clobber that.)
+  gsap.from('.bar', {
     opacity: 0,
+    y: 12,
     duration: 1.0,
     ease: 'power2.out',
-    delay: 0.9,
-    stagger: 0.12,
+    delay: 0.6,
   });
 }
 
-/* ---- Filmstrip scroller -------------------------------------------
-   Auto-drifts; drag to throw it. The track is duplicated and wrapped
-   for an endless loop. (No wheel hijack — the page scrolls now.)    */
-const strip = document.querySelector<HTMLElement>('[data-strip]')!;
-const track = document.querySelector<HTMLElement>('[data-track]')!;
+/* ---- Work: clean title list ------------------------------------
+   Built from the projects config. Hovering a title shows a still
+   that follows the cursor; clicking opens the modal. No copy on
+   the scroll — detail lives in the modal only.                   */
+const worklist = document.querySelector<HTMLOListElement>('[data-worklist]')!;
+worklist.innerHTML = projects.map((p, i) => `
+  <li>
+    <button class="workrow" data-i="${i}" aria-haspopup="dialog">
+      <span class="workrow__title">${p.title}</span>
+      <span class="workrow__meta">${p.client} — ${p.year}</span>
+    </button>
+  </li>`).join('');
 
-const itemHTML = projects.map((p) => `
-  <a class="strip__item" href="/a.html#${p.slug}">
-    <img src="${p.media[0]}" alt="${p.title} — ${p.client}" loading="lazy" />
-    <span class="caption">${p.title} · ${p.client}</span>
-  </a>`).join('');
-track.innerHTML = itemHTML + itemHTML;        // x2 for seamless wrap
-
-const STRIP = {
-  drift: reducedMotion ? 0 : 18,  // auto-drift px/s
-  wheelFactor: 0.6,               // wheel sensitivity
-  ease: 0.08,                     // catch-up lerp (lower = floatier)
-};
-
-let stripX = 0;          // rendered position
-let stripTarget = 0;     // where input wants it
-let half = 0;            // width of one copy, for wrapping
-const measure = () => { half = track.scrollWidth / 2; };
-window.addEventListener('load', measure);
-window.addEventListener('resize', measure);
-measure();
-
-// trackpad horizontal swipes still nudge the strip, but vertical
-// wheel is left alone so it scrolls the page
-window.addEventListener('wheel', (e) => {
-  if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) stripTarget -= e.deltaX * STRIP.wheelFactor;
-}, { passive: true });
-
-let dragging = false;
-let dragStartX = 0;
-let dragStartTarget = 0;
-strip.addEventListener('pointerdown', (e) => {
-  dragging = true;
-  dragStartX = e.clientX;
-  dragStartTarget = stripTarget;
-  strip.classList.add('is-dragging');
-  strip.setPointerCapture(e.pointerId);
+/* Cursor-following still preview (desktop hover) */
+const preview = document.querySelector<HTMLDivElement>('[data-preview]')!;
+const previewImg = preview.querySelector('img')!;
+const px = gsap.quickTo(preview, 'x', { duration: 0.5, ease: 'power3.out' });
+const py = gsap.quickTo(preview, 'y', { duration: 0.5, ease: 'power3.out' });
+if (!reducedMotion) {
+  window.addEventListener('pointermove', (e) => {
+    px(e.clientX - 150);          // centre the 300px still on the cursor
+    py(e.clientY - 94);
+  });
+}
+let shownIdx = -1;
+worklist.addEventListener('pointerover', (e) => {
+  const row = (e.target as HTMLElement).closest<HTMLElement>('.workrow');
+  if (!row) return;
+  const i = Number(row.dataset.i);
+  if (i === shownIdx) return;
+  shownIdx = i;
+  previewImg.src = projects[i].media[0];
+  gsap.to(preview, { opacity: 1, scale: 1, duration: 0.4, ease: 'power3.out' });
 });
-strip.addEventListener('pointermove', (e) => {
-  if (dragging) stripTarget = dragStartTarget + (e.clientX - dragStartX);
+worklist.addEventListener('pointerleave', () => {
+  shownIdx = -1;
+  gsap.to(preview, { opacity: 0, scale: 0.96, duration: 0.4, ease: 'power3.out' });
 });
-const endDrag = () => { dragging = false; strip.classList.remove('is-dragging'); };
-strip.addEventListener('pointerup', endDrag);
-strip.addEventListener('pointercancel', endDrag);
 
-gsap.ticker.add((_, delta) => {
-  if (!dragging) stripTarget -= STRIP.drift * (delta / 1000);
-  stripX += (stripTarget - stripX) * STRIP.ease;
-  if (half > 0) {
-    // wrap both values together so the loop is invisible
-    while (stripX < -half) { stripX += half; stripTarget += half; }
-    while (stripX > 0) { stripX -= half; stripTarget -= half; }
-  }
-  track.style.transform = `translate3d(${stripX}px, 0, 0)`;
+/* ---- Project modal ---------------------------------------------- */
+const modal = document.querySelector<HTMLDivElement>('[data-modal]')!;
+const modalInner = modal.querySelector<HTMLDivElement>('.modal__inner')!;
+const modalClose = modal.querySelector<HTMLButtonElement>('[data-modal-close]')!;
+let lastFocus: HTMLElement | null = null;
+
+function openModal(p: Project) {
+  const lead = p.video
+    ? `<iframe class="modal__video" src="${p.video}?autoplay=1&muted=1&loop=1&title=0&byline=0" allow="autoplay; fullscreen" title="${p.title}"></iframe>`
+    : `<div class="modal__media"><img src="${p.media[0]}" alt="${p.title} — ${p.client}" /></div>`;
+  const stills = p.media.slice(p.video ? 0 : 1)
+    .map((src) => `<div class="modal__media"><img loading="lazy" src="${src}" alt="${p.title} still" /></div>`)
+    .join('');
+  modalInner.innerHTML = `
+    ${lead}
+    <div class="modal__meta caption"><span>${p.client}</span><span>${p.year}</span><span>${p.role}</span></div>
+    <h2 class="modal__title">${p.title}</h2>
+    <p class="modal__blurb">${p.blurb}</p>
+    ${stills}`;
+  modal.hidden = false;
+  modal.scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+  lastFocus = document.activeElement as HTMLElement;
+  modalClose.focus();
+  gsap.fromTo(modal, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power2.out' });
+  gsap.fromTo(modalInner, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'expo.out', delay: 0.05 });
+}
+function closeModal() {
+  modal.hidden = true;
+  modalInner.innerHTML = '';       // stops any playing iframe
+  document.body.style.overflow = '';
+  gsap.to(preview, { opacity: 0, duration: 0.2 });
+  shownIdx = -1;
+  lastFocus?.focus();
+}
+worklist.addEventListener('click', (e) => {
+  const row = (e.target as HTMLElement).closest<HTMLElement>('.workrow');
+  if (!row) return;
+  openModal(projects[Number(row.dataset.i)]);
 });
+modalClose.addEventListener('click', closeModal);
+window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) closeModal(); });
+
+/* ---- Studio + clients copy (single source: projects.ts) --------- */
+document.querySelector<HTMLElement>('[data-about]')!.textContent = site.about;
+document.querySelector<HTMLElement>('[data-clients]')!.innerHTML =
+  site.clients.split(' · ').map((c) => `<li>${c}</li>`).join('');
 
 /* ---- Pause the video once the hero scrolls away -----------------
    Saves GPU + battery: when the hero is off screen we stop drawing
@@ -366,9 +381,6 @@ const hero = document.querySelector<HTMLElement>('.hero')!;
 new IntersectionObserver(
   ([entry]) => {
     heroVisible = entry.isIntersecting;
-    // drive the label opacity through gsap so the cut scheduler and the
-    // hide-on-scroll don't fight over inline style
-    gsap.to(nowPlaying, { opacity: heroVisible ? 0.75 : 0, duration: 0.4, ease: 'power2.out' });
     if (!current) return;
     if (heroVisible) { if (unlocked || !reducedMotion) current.el.play().catch(() => {}); }
     else current.el.pause();
@@ -376,35 +388,28 @@ new IntersectionObserver(
   { threshold: 0 },
 ).observe(hero);
 
-/* ---- Section scroll-reveals -------------------------------------
-   Each [data-reveal] section's pieces rise + fade in as it enters
-   the viewport. Calm, on the house easing. Skipped for reduced motion. */
-if (!reducedMotion) {
-  gsap.utils.toArray<HTMLElement>('[data-reveal]').forEach((section) => {
-    const bits = section.querySelectorAll<HTMLElement>(
-      '.sec__label, .sec__title, .sec__body, .cap, .clients li',
-    );
-    gsap.from(bits, {
-      y: 40,
-      opacity: 0,
-      duration: 0.9,
-      ease: 'expo.out',
-      stagger: 0.06,
-      scrollTrigger: { trigger: section, start: 'top 78%' },
+/* ---- Section reveals -------------------------------------------
+   CSS-class driven. Each item gets `.reveal`; the hidden state lives
+   in CSS behind `.reveal-on` on <html>, so if JS never runs the
+   content is simply visible. We add `.is-in` per item as its section
+   enters, and unconditionally after a short fail-safe timer — so
+   nothing is ever stuck hidden. CSS handles reduced-motion.        */
+{
+  // Reveal each SECTION as one block (static elements — avoids a quirk
+  // where the dynamically-created rows wouldn't take the reveal class).
+  const sections = [...document.querySelectorAll<HTMLElement>('[data-reveal], .footer')];
+  document.documentElement.classList.add('reveal-on');
+  sections.forEach((s) => s.classList.add('reveal'));
+
+  const io = new IntersectionObserver((entries, obs) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('is-in');
+      obs.unobserve(entry.target);
     });
-  });
+  }, { rootMargin: '0px 0px -10% 0px' });
+  sections.forEach((s) => io.observe(s));
 
-  // footer CTA gets its own beat
-  gsap.from('.footer__kicker, .footer__mail', {
-    y: 40, opacity: 0, duration: 1.0, ease: 'expo.out', stagger: 0.1,
-    scrollTrigger: { trigger: '.footer', start: 'top 80%' },
-  });
-
-  // Trigger positions are measured at creation — but the web fonts and
-  // the first video frame change the layout AFTER that. Recompute once
-  // everything has settled so no section gets stuck hidden.
-  const refresh = () => ScrollTrigger.refresh();
-  window.addEventListener('load', refresh);
-  document.fonts?.ready.then(refresh);
-  setTimeout(refresh, 1200);
+  // fail-safe: whatever happens, never leave content hidden
+  setTimeout(() => sections.forEach((s) => s.classList.add('is-in')), 2500);
 }
