@@ -20,56 +20,64 @@ import './d.css';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { projects, site, type Project } from '../data/projects';
+import { heroClips } from '../data/clips';
 import { initWordmark } from '../shared/wordmark';
 
-/* ---- The films ------------------------------------------------ */
-const SOURCES = [
-  { file: '/media/clips/bbc2.mp4', label: 'BBC Two — Visceral' },
-  { file: '/media/clips/reel.mp4', label: 'Reel — Selected Work' },
-  { file: '/media/clips/aiga.mp4', label: 'AIGA — Revival' },
-  { file: '/media/clips/quickies.mp4', label: 'Experiments' },
-];
-
-/* ---- Cut behaviour --------------------------------------------- */
+/* ---- The reel ------------------------------------------------
+   A shuffled playlist of full clips (no 3-second sampling). Each clip
+   plays start-to-end, then dissolves to the next; at the end of the
+   list it loops back to the first clip played. Only two video elements
+   ever load (the one on screen + the one preloading), so we never
+   download all the clips at once.                                  */
 const CLIP = {
-  length: 3.0,        // seconds each clip holds
-  fade: 0.45,         // crossfade duration
-  glitchAmount: 1.0,  // 0 = clean dissolve, 1 = full glitch cut
-  margin: 0.06,       // skip the first/last 6% of each film (slates, fades)
-  grain: 0.06,        // constant film grain
+  fade: 0.45,   // transition duration (seconds)
+  glitch: 1.0,  // 0 = clean dissolve, 1 = full sliced / RGB-split glitch cut
+  grain: 0.05,  // constant film grain (0 = clean)
 };
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/* ---- Video elements -------------------------------------------- */
-interface Film {
-  el: HTMLVideoElement;
-  tex: THREE.VideoTexture;
-  label: string;
-  ready: boolean;
+/** Fisher-Yates shuffle — a fresh random order on every visit. */
+function shuffle<T>(arr: readonly T[]): T[] {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
-// phones: don't pre-download four full films; fetch as needed
-const coarsePointer = matchMedia('(pointer: coarse)').matches;
+const playlist = shuffle(heroClips);   // random order; loops from the top
+let pos = 0;
+const nextPos = () => (pos + 1) % playlist.length;
 
-const films: Film[] = SOURCES.map((s) => {
+/* Two reusable video slots: the one on screen + the one preloading. */
+interface Slot { el: HTMLVideoElement; tex: THREE.VideoTexture; }
+function makeSlot(): Slot {
   const el = document.createElement('video');
-  el.src = s.file;
-  // mobile autoplay policies check the *attributes*, not just the
-  // JS properties — set both or iOS refuses to play inline
-  el.muted = true;
-  el.setAttribute('muted', '');
-  el.playsInline = true;
-  el.setAttribute('playsinline', '');
-  el.setAttribute('webkit-playsinline', '');
-  el.preload = coarsePointer ? 'metadata' : 'auto';
+  // mobile autoplay policies check the *attributes*, not just the JS props
+  el.muted = true; el.setAttribute('muted', '');
+  el.playsInline = true; el.setAttribute('playsinline', ''); el.setAttribute('webkit-playsinline', '');
+  el.preload = 'auto';
   el.crossOrigin = 'anonymous';
   const tex = new THREE.VideoTexture(el);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.minFilter = THREE.LinearFilter;
-  const film: Film = { el, tex, label: s.label, ready: false };
-  el.addEventListener('loadedmetadata', () => { film.ready = true; });
-  return film;
-});
+  return { el, tex };
+}
+let cur = makeSlot();
+let nxt = makeSlot();
+
+const aspectOf = (s: Slot) => (s.el.videoWidth ? s.el.videoWidth / s.el.videoHeight : 16 / 9);
+
+/** Point a slot at a clip; resolves once a frame is decodable. */
+function loadInto(slot: Slot, url: string): Promise<void> {
+  return new Promise((resolve) => {
+    const done = () => { slot.el.removeEventListener('loadeddata', done); resolve(); };
+    slot.el.addEventListener('loadeddata', done);
+    slot.el.src = url;
+    slot.el.load();
+  });
+}
 
 /* ---- WebGL screen ----------------------------------------------- */
 const canvas = document.querySelector<HTMLCanvasElement>('[data-screen]')!;
@@ -79,8 +87,8 @@ const scene = new THREE.Scene();
 const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
 const uniforms = {
-  uFrom: { value: films[0].tex },
-  uTo: { value: films[0].tex },
+  uFrom: { value: cur.tex },
+  uTo: { value: cur.tex },
   uAspectFrom: { value: 16 / 9 },
   uAspectTo: { value: 16 / 9 },
   uScreen: { value: innerWidth / innerHeight },
@@ -152,8 +160,12 @@ const screenMat = new THREE.ShaderMaterial({
 scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), screenMat));
 
 function resize() {
-  renderer.setSize(innerWidth, innerHeight);
-  uniforms.uScreen.value = innerWidth / innerHeight;
+  // size to the canvas's own box (the CSS hero band), not the full window,
+  // so the reel is cover-fit + centered within the visible video area
+  const w = canvas.clientWidth || innerWidth;
+  const h = canvas.clientHeight || innerHeight;
+  renderer.setSize(w, h, false);            // false = leave canvas CSS size alone
+  uniforms.uScreen.value = w / h;
 }
 resize();
 window.addEventListener('resize', resize);
@@ -167,111 +179,77 @@ gsap.ticker.add(() => {
   renderer.render(scene, camera);
 });
 
-/* ---- The cut scheduler ------------------------------------------ */
-let current: Film | null = null;
-
-const aspectOf = (f: Film) =>
-  f.el.videoWidth ? f.el.videoWidth / f.el.videoHeight : 16 / 9;
-
-/** Random in-point that leaves room for the clip + crossfade. */
-function randomStart(f: Film) {
-  const d = f.el.duration;
-  const lo = d * CLIP.margin;
-  const hi = d * (1 - CLIP.margin) - (CLIP.length + 1);
-  return lo + Math.random() * Math.max(hi - lo, 0);
-}
-
-/** Seek a film to a random spot and get it playing (hidden). */
-function prepare(f: Film): Promise<void> {
-  return new Promise((resolve) => {
-    const go = () => {
-      f.el.currentTime = randomStart(f);
-      const onSeeked = () => {
-        f.el.removeEventListener('seeked', onSeeked);
-        f.el.play().then(resolve).catch(() => resolve());
-      };
-      f.el.addEventListener('seeked', onSeeked);
-    };
-    if (f.ready) go();
-    else f.el.addEventListener('loadedmetadata', go, { once: true });
-  });
-}
-
-function pickNext(): Film {
-  // any film except the one on screen — maximum variety
-  const pool = films.filter((f) => f !== current);
-  return pool[Math.floor(Math.random() * pool.length)];
-}
-
-async function firstFrame() {
-  const f = films[Math.floor(Math.random() * films.length)];
-  await prepare(f);
-  current = f;
-  uniforms.uFrom.value = f.tex;
-  uniforms.uTo.value = f.tex;
-  uniforms.uAspectFrom.value = uniforms.uAspectTo.value = aspectOf(f);
-}
-
-async function cut() {
-  const next = pickNext();
-  await prepare(next);
-
-  uniforms.uTo.value = next.tex;
-  uniforms.uAspectTo.value = aspectOf(next);
-  uniforms.uSeed.value = Math.random() * 100;
-
-  await new Promise<void>((resolve) => {
-    gsap.timeline({ onComplete: resolve })
-      .to(uniforms.uMix, { value: 1, duration: CLIP.fade, ease: 'power3.inOut' }, 0)
-      .to(uniforms.uGlitch, { value: CLIP.glitchAmount, duration: CLIP.fade * 0.4, ease: 'power2.in' }, 0)
-      .to(uniforms.uGlitch, { value: 0, duration: CLIP.fade * 0.6, ease: 'power3.out' }, CLIP.fade * 0.4);
-  });
-
-  // promote "next" to "current", park the old film
-  current?.el.pause();
-  current = next;
-  uniforms.uFrom.value = next.tex;
-  uniforms.uAspectFrom.value = aspectOf(next);
-  uniforms.uMix.value = 0;
-}
-
-/* ---- Mobile autoplay unlock ------------------------------------
-   iOS (notably Low Power Mode) rejects play() until the visitor
-   touches the page. First touch: replay the current film and
-   "bless" the others with a play/pause so later programmatic
-   play() calls are allowed too.                                  */
+/* ---- Playback ---------------------------------------------------
+   Play each clip start-to-end, then dissolve to the preloaded next.
+   At the end of the shuffled list it loops back to the first clip.  */
+const taphint = document.querySelector<HTMLElement>('[data-taphint]')!;
 let unlocked = false;
+let transitioning = false;
+
+/** First touch on phones that block autoplay: start the reel and
+    "bless" the next slot so later programmatic play() calls work. */
 function unlockPlayback() {
   if (unlocked) return;
   unlocked = true;
-  document.querySelector<HTMLElement>('[data-taphint]')!.hidden = true;
-  films.forEach((f) => {
-    f.el.play()
-      .then(() => { if (f !== current) f.el.pause(); })
-      .catch(() => {});
-  });
+  taphint.hidden = true;
+  cur.el.play().catch(() => {});
+  nxt.el.play().then(() => nxt.el.pause()).catch(() => {});
 }
 window.addEventListener('pointerdown', unlockPlayback);
 window.addEventListener('touchstart', unlockPlayback, { passive: true });
 
-async function run() {
-  await firstFrame();
-  // if the browser refused to start the film, ask for a tap
-  if (current && current.el.paused && !unlocked) {
-    document.querySelector<HTMLElement>('[data-taphint]')!.hidden = false;
-  }
-  if (reducedMotion) return;        // calm fallback: one film, no cuts
-  // steady rhythm of cuts, forever
-  // (prepare() inside cut() absorbs seek latency before each fade)
-  const loop = async () => {
-    await new Promise((r) => setTimeout(r, CLIP.length * 1000));
-    // skip cuts while the tab is hidden or the hero is scrolled away
-    if (!document.hidden && heroVisible) await cut();
-    loop();
-  };
-  loop();
+/** Current clip ended → dissolve to the next, promote it, queue more. */
+async function advance() {
+  if (transitioning) return;
+  transitioning = true;
+
+  uniforms.uTo.value = nxt.tex;
+  uniforms.uAspectTo.value = aspectOf(nxt);
+  uniforms.uSeed.value = Math.random() * 100;   // fresh tear pattern each cut
+  nxt.el.currentTime = 0;
+  await nxt.el.play().catch(() => {});
+
+  // glitch cut: blend across while a sliced RGB-split tears, then settles
+  await new Promise<void>((res) => {
+    gsap.timeline({ onComplete: () => res() })
+      .to(uniforms.uMix, { value: 1, duration: CLIP.fade, ease: 'power3.inOut' }, 0)
+      .to(uniforms.uGlitch, { value: CLIP.glitch, duration: CLIP.fade * 0.4, ease: 'power2.in' }, 0)
+      .to(uniforms.uGlitch, { value: 0, duration: CLIP.fade * 0.6, ease: 'power3.out' }, CLIP.fade * 0.4);
+  });
+
+  // promote nxt -> cur; the old slot is freed to preload the next clip
+  cur.el.removeEventListener('ended', advance);
+  cur.el.pause();
+  [cur, nxt] = [nxt, cur];
+  uniforms.uFrom.value = cur.tex;
+  uniforms.uAspectFrom.value = aspectOf(cur);
+  uniforms.uTo.value = cur.tex;
+  uniforms.uMix.value = 0;
+  cur.el.addEventListener('ended', advance);
+  pos = nextPos();
+  transitioning = false;
+
+  loadInto(nxt, playlist[nextPos()]);   // queue the clip after this one
 }
-run();
+
+async function startReel() {
+  await loadInto(cur, playlist[pos]);
+  uniforms.uFrom.value = cur.tex;
+  uniforms.uTo.value = cur.tex;
+  uniforms.uAspectFrom.value = uniforms.uAspectTo.value = aspectOf(cur);
+
+  if (reducedMotion) {
+    // calm fallback: hold one still frame, no playback or transitions
+    cur.el.currentTime = Math.min(1.2, (cur.el.duration || 2) * 0.3);
+    return;
+  }
+
+  await cur.el.play().catch(() => {});
+  if (cur.el.paused && !unlocked) taphint.hidden = false;  // autoplay blocked
+  cur.el.addEventListener('ended', advance);
+  loadInto(nxt, playlist[nextPos()]);    // preload the next clip
+}
+startReel();
 
 /* ---- Wordmark (home button + idle motion) ----------------------- */
 initWordmark(document.querySelector<HTMLElement>('[data-moniker]')!);
@@ -381,9 +359,9 @@ const hero = document.querySelector<HTMLElement>('.hero')!;
 new IntersectionObserver(
   ([entry]) => {
     heroVisible = entry.isIntersecting;
-    if (!current) return;
-    if (heroVisible) { if (unlocked || !reducedMotion) current.el.play().catch(() => {}); }
-    else current.el.pause();
+    if (transitioning) return;       // don't fight an in-flight dissolve
+    if (heroVisible) { if (!reducedMotion) cur.el.play().catch(() => {}); }
+    else cur.el.pause();
   },
   { threshold: 0 },
 ).observe(hero);
