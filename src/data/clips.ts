@@ -1,6 +1,6 @@
 /* AUTO-GENERATED from videoclips/ - do not edit by hand.
    The landing reel shuffles and plays these clips (public/clips/).
-   Excluded: AIGA passes 1/2/3/4/6/7, AIR JORDAN - AJ36/_a, and HHU_ID_010_v14. */
+   Excluded: AIGA passes 1/2/3/4/6/7, AIR JORDAN - AJ36/_a, HHU_ID_010_v14, YYY -The Beats-, and Z_tear_1. */
 export const heroClips: string[] = [
   '/clips/01.mp4',
   '/clips/02.mp4',
@@ -20,6 +20,4 @@ export const heroClips: string[] = [
   '/clips/16.mp4',
   '/clips/17.mp4',
   '/clips/18.mp4',
-  '/clips/19.mp4',
-  '/clips/20.mp4',
 ];
