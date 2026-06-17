@@ -33,6 +33,38 @@ export interface Project {
   media: string[];
   video?: string;
   tone?: string;
+  /* OPTIONAL rich case study. When present, the modal renders a
+     full studio-style page (looping lead film, long-form copy,
+     image/grid/video blocks and a credits list) instead of the
+     simple hero + blurb + stills layout. */
+  study?: Study;
+}
+
+/* A single credit line in the case-study footer, e.g.
+   { role: 'Director', name: 'Kenneth Robin' }. */
+export interface Credit { role: string; name: string; }
+
+/* Ordered content blocks for a case study, rendered top-to-bottom
+   under the lead film + intro copy.
+     text   one or more paragraphs of running copy
+     image  a single full-width still (optional caption)
+     grid   a set of stills laid out in a responsive grid
+     video  a muted, looping local .mp4 (optional caption) */
+export type StudyBlock =
+  | { kind: 'text'; body: string[] }
+  | { kind: 'image'; src: string; cap?: string }
+  | { kind: 'grid'; src: string[] }
+  | { kind: 'video'; src: string; cap?: string };
+
+export interface Study {
+  /* Looping local .mp4 shown first, full-bleed, on the detail page. */
+  lead: string;
+  /* Long-form, first-person intro paragraphs under the lead film. */
+  intro: string[];
+  /* Everything below the intro, in display order. */
+  blocks: StudyBlock[];
+  /* Credits list shown at the foot of the case study. */
+  credits: Credit[];
 }
 
 const m = (slug: string, count: number): string[] =>
@@ -50,6 +82,35 @@ export const projects: Project[] = [
     media: m('att-discovery-district', 5),
     video: 'https://player.vimeo.com/video/533794229',
     tone: '#0a1a2e',
+    study: {
+      lead: '/media/att-discovery-district/case/hero.mp4',
+      intro: [
+        'Gensler approached me to create a bumper for the media wall at AT&T’s Discovery District — the public plaza at the heart of AT&T’s headquarters in downtown Dallas, where people gather under a 104-foot screen to watch games, catch events, and spend time outdoors. I worked directly with Gensler and AT&T, following their brand guidelines and color system while we shaped the concept together.',
+        'As one of the first artists commissioned for the wall, I designed a world of bioluminescent deep-sea creatures — a piece about diversity, the idea that the strangest, most singular forms of life thrive side by side in the same dark water. The brief was open; the responsibility was to make something that belonged to the place and rewarded the people standing beneath it.',
+        'I directed the look from concept through final delivery, developing the language through extensive animation and material tests before committing to the build. Each creature was modeled, rigged, and hand-detailed inside and out — translucent skin, internal light, fine surface texture — so the work holds up at architectural scale, where a single organism drifts four stories tall across the plaza.',
+        'This is the kind of work I care about most: motion as part of a place, not just a screen — content designed for the room it lives in and the people who gather there.',
+      ],
+      blocks: [
+        { kind: 'image', src: '/media/att-discovery-district/case/styleframe.jpg', cap: 'Key styleframe — the bioluminescent palette and creature language set against AT&T’s brand color system.' },
+        { kind: 'grid', src: [
+          '/media/att-discovery-district/case/creature-01.jpg',
+          '/media/att-discovery-district/case/creature-02.jpg',
+          '/media/att-discovery-district/case/creature-03.jpg',
+          '/media/att-discovery-district/case/creature-04.jpg',
+          '/media/att-discovery-district/case/creature-05.jpg',
+          '/media/att-discovery-district/case/creature-06.jpg',
+          '/media/att-discovery-district/case/creature-07.png',
+        ] },
+        { kind: 'video', src: '/media/att-discovery-district/case/bts.mp4', cap: 'Behind the scenes — material, lighting and animation tests developed to define the look.' },
+        { kind: 'image', src: '/media/att-discovery-district/case/still.jpg' },
+      ],
+      credits: [
+        { role: 'Director', name: 'Kenneth Robin' },
+        { role: 'Creative Director', name: 'Roger Ferris' },
+        { role: 'Design Partner', name: 'Gensler' },
+        { role: 'Client', name: 'AT&T' },
+      ],
+    },
   },
   {
     slug: 'bbc-two',

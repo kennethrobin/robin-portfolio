@@ -313,7 +313,50 @@ const modalInner = modal.querySelector<HTMLDivElement>('.modal__inner')!;
 const modalClose = modal.querySelector<HTMLButtonElement>('[data-modal-close]')!;
 let lastFocus: HTMLElement | null = null;
 
+/* Looping, muted, inline local video (used by case-study lead + blocks). */
+const loopVideo = (src: string, cls: string, label: string): string =>
+  `<video class="${cls}" src="${src}" autoplay muted loop playsinline preload="metadata" aria-label="${label}"></video>`;
+
+/* Rich studio-style case study (only when project.study is present). */
+function renderStudy(p: Project): string {
+  const s = p.study!;
+  const intro = s.intro.map((para) => `<p>${para}</p>`).join('');
+  const blocks = s.blocks.map((b) => {
+    switch (b.kind) {
+      case 'text':
+        return `<div class="case__text">${b.body.map((t) => `<p>${t}</p>`).join('')}</div>`;
+      case 'image':
+        return `<figure class="case__media"><img loading="lazy" src="${b.src}" alt="${p.title} — ${p.client}" />${b.cap ? `<figcaption class="case__cap caption">${b.cap}</figcaption>` : ''}</figure>`;
+      case 'video':
+        return `<figure class="case__media">${loopVideo(b.src, 'case__video', `${p.title} — behind the scenes`)}${b.cap ? `<figcaption class="case__cap caption">${b.cap}</figcaption>` : ''}</figure>`;
+      case 'grid':
+        return `<div class="case__grid">${b.src.map((src) => `<div class="case__cell"><img loading="lazy" src="${src}" alt="${p.title} detail" /></div>`).join('')}</div>`;
+    }
+  }).join('');
+  const credits = s.credits
+    .map((c) => `<div class="case__credit"><dt>${c.role}</dt><dd>${c.name}</dd></div>`)
+    .join('');
+  return `
+    ${loopVideo(s.lead, 'case__lead', `${p.title} — ${p.client}`)}
+    <div class="modal__meta caption"><span>${p.client}</span><span>${p.year}</span><span>${p.role}</span></div>
+    <h2 class="modal__title">${p.title}</h2>
+    <div class="case__intro">${intro}</div>
+    ${blocks}
+    <dl class="case__credits">${credits}</dl>`;
+}
+
 function openModal(p: Project) {
+  if (p.study) {
+    modalInner.innerHTML = renderStudy(p);
+    modal.hidden = false;
+    modal.scrollTop = 0;
+    document.body.style.overflow = 'hidden';
+    lastFocus = document.activeElement as HTMLElement;
+    modalClose.focus();
+    gsap.fromTo(modal, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power2.out' });
+    gsap.fromTo(modalInner, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'expo.out', delay: 0.05 });
+    return;
+  }
   const lead = p.video
     ? `<iframe class="modal__video" src="${p.video}?autoplay=1&muted=1&loop=1&title=0&byline=0" allow="autoplay; fullscreen" title="${p.title}"></iframe>`
     : `<div class="modal__media"><img src="${p.media[0]}" alt="${p.title} — ${p.client}" /></div>`;
