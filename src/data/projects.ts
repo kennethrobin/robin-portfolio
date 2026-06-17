@@ -391,3 +391,45 @@ export const site = {
   about:
     'I am a designer based in Los Angeles, working across film, broadcast design, 3D, and large-scale experiences for over 15 years. I bring a strong point of view and the craft to back it — concepting ambitious work and, when it doesn’t exist yet, inventing the technique to make it real.',
 };
+
+/* ---- Labs — experimental / self-initiated work --------------
+   Opened from the top nav as a modal (like a project page). A
+   masonry gallery of mixed media; .mp4 entries play as muted
+   loops, everything else renders as an image. Add/remove paths
+   in public/media/labs/ here to refine the dump. */
+export const labs = {
+  title: 'Labs',
+  blurb:
+    'A running dump of experiments, tests and self-initiated work — techniques I’m developing and ideas I chase outside of client projects. Rough by design, and updated often.',
+  items: [
+    '/media/labs/labs-01.jpg',
+    '/media/labs/labs-02.png',
+    '/media/labs/labs-03.png',
+    '/media/labs/labs-04.png',
+    '/media/labs/labs-05.jpg',
+    '/media/labs/labs-06.webp',
+    '/media/labs/labs-07.webp',
+    '/media/labs/labs-08.jpg',
+    '/media/labs/labs-09.jpg',
+    '/media/labs/labs-10.webp',
+    '/media/labs/labs-11.webp',
+    '/media/labs/labs-12.webp',
+    '/media/labs/labs-13.webp',
+    '/media/labs/labs-14.jpg',
+    '/media/labs/labs-15.jpg',
+    '/media/labs/labs-16.webp',
+    '/media/labs/labs-17.mp4',
+    '/media/labs/labs-18.webp',
+    '/media/labs/labs-19.webp',
+    '/media/labs/labs-20.jpg',
+    '/media/labs/labs-21.png',
+    '/media/labs/labs-22.jpg',
+    '/media/labs/labs-23.jpg',
+    '/media/labs/labs-24.png',
+    '/media/labs/labs-25.jpg',
+    '/media/labs/labs-26.gif',
+    '/media/labs/labs-27.gif',
+    '/media/labs/labs-28.mp4',
+    '/media/labs/labs-29.webp',
+  ],
+};

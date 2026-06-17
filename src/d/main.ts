@@ -18,7 +18,7 @@
 import './d.css';
 import * as THREE from 'three';
 import gsap from 'gsap';
-import { projects, site, type Project } from '../data/projects';
+import { projects, site, labs, type Project } from '../data/projects';
 import { heroClips } from '../data/clips';
 import { initWordmark } from '../shared/wordmark';
 
@@ -415,10 +415,38 @@ function closeModal() {
   shownIdx = -1;
   lastFocus?.focus();
 }
+
+/* ---- Labs — experimental work, opened from the nav as a masonry
+   gallery in the same modal. .mp4 entries loop muted; everything
+   else (jpg/png/webp/gif) renders as an image. */
+function openLabs() {
+  const items = labs.items.map((src) => {
+    const media = /\.mp4$/i.test(src)
+      ? `<video class="labs__media" src="${src}" autoplay muted loop playsinline preload="metadata"></video>`
+      : `<img class="labs__media" loading="lazy" src="${src}" alt="Labs experiment" />`;
+    return `<div class="labs__item">${media}</div>`;
+  }).join('');
+  modalInner.innerHTML = `
+    <h2 class="modal__title">${labs.title}</h2>
+    <div class="case__intro"><p>${labs.blurb}</p></div>
+    <div class="labs__grid">${items}</div>`;
+  modal.hidden = false;
+  modal.scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+  lastFocus = document.activeElement as HTMLElement;
+  modalClose.focus();
+  gsap.fromTo(modal, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power2.out' });
+  gsap.fromTo(modalInner, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'expo.out', delay: 0.05 });
+}
+
 worklist.addEventListener('click', (e) => {
   const row = (e.target as HTMLElement).closest<HTMLElement>('.workrow');
   if (!row) return;
   openModal(projects[Number(row.dataset.i)]);
+});
+document.querySelector<HTMLElement>('[data-labs]')?.addEventListener('click', (e) => {
+  e.preventDefault();
+  openLabs();
 });
 modalClose.addEventListener('click', closeModal);
 window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) closeModal(); });

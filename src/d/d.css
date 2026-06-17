@@ -532,6 +532,16 @@ body::after {
   .case__vgrid { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* ---- Labs gallery (masonry dump of mixed images + loops) ----- */
+.labs__grid {
+  margin-top: clamp(40px, 7vh, 80px);
+  columns: 3 260px;              /* up to 3 columns, each >= 260px */
+  column-gap: var(--grid-gap);
+}
+.labs__item { break-inside: avoid; margin-bottom: var(--grid-gap); }
+.labs__media { width: 100%; height: auto; display: block; background: #0a0a0c; }
+@media (max-width: 640px) { .labs__grid { columns: 2 140px; } }
+
 /* ---- Scroll reveal --------------------------------------------
    The hidden state is gated behind .reveal-on (added by JS), so if
    JS is off the content is simply visible. JS adds .is-in per item
