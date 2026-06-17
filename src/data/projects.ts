@@ -38,6 +38,9 @@ export interface Project {
      image/grid/video blocks and a credits list) instead of the
      simple hero + blurb + stills layout. */
   study?: Study;
+  /* OPTIONAL. Hide from the work index while keeping the data here
+     so the page can be built out and re-enabled later. */
+  hidden?: boolean;
 }
 
 /* A single credit line in the case-study footer, e.g.
@@ -46,15 +49,19 @@ export interface Credit { role: string; name: string; }
 
 /* Ordered content blocks for a case study, rendered top-to-bottom
    under the lead film + intro copy.
-     text   one or more paragraphs of running copy
-     image  a single full-width still (optional caption)
-     grid   a set of stills laid out in a responsive grid
-     video  a muted, looping local .mp4 (optional caption) */
+     text       one or more paragraphs of running copy
+     image      a single full-width still (optional caption)
+     grid       a set of stills laid out in a responsive grid
+     video      a muted, looping local .mp4 (optional caption).
+                Set controls:true to let the viewer unmute/scrub.
+     videogrid  a set of muted, looping local .mp4s in a grid
+                (e.g. lower thirds / bumpers) */
 export type StudyBlock =
   | { kind: 'text'; body: string[] }
   | { kind: 'image'; src: string; cap?: string }
   | { kind: 'grid'; src: string[] }
-  | { kind: 'video'; src: string; cap?: string };
+  | { kind: 'video'; src: string; cap?: string; controls?: boolean }
+  | { kind: 'videogrid'; src: string[]; cap?: string };
 
 export interface Study {
   /* Looping local .mp4 shown first, full-bleed, on the detail page. */
@@ -116,24 +123,67 @@ export const projects: Project[] = [
     slug: 'bbc-two',
     title: 'BBC Two Rebrand',
     client: 'BBC',
-    year: '2020',
+    year: '2018',
     role: 'Design, Animation',
     blurb:
-      'Ident concept for the BBC Two rebrand — the "2" as a living, visceral material study in motion.',
+      'One of sixteen launch idents for BBC Two’s first rebrand in 20 years — my own interpretation of the channel’s iconic “2” as a living, visceral material study in motion.',
     media: m('bbc-two', 1),
     video: 'https://player.vimeo.com/video/480136521',
     tone: '#1a0a12',
     study: {
       lead: 'https://player.vimeo.com/video/480136521',
       intro: [
-        'The BBC Two “2” has always been a playground for designers — a mark made to be reimagined as an object, a creature, a material. For this rebrand concept I wanted to treat the numeral as something alive and visceral: a form that breathes, tenses and reacts, built from a material that feels organic rather than graphic.',
-        'I developed the idea through a run of material and motion studies — exploring surface, translucency and the way light moves across and through the “2” as it shifts. The aim was an ident that reads less like a logo animation and more like a living thing caught on screen for a few seconds.',
-        'Everything was designed, modeled and animated to hold up at broadcast scale, where the mark has to land with presence in just a beat or two — distinct, tactile, and unmistakably Two.',
+        'In 2018 BBC Two unveiled its first new identity in twenty years, retiring two decades of “2” idents for a single unifying idea: the curve of the numeral, reinterpreted by a roster of artists and studios. The system was built by the BBC’s in-house agency, BBC Creative, with UK brand agency Superunion — and I was one of the artists they commissioned to make an ident within it.',
+        'My brief was to take that iconic curve and make it my own: a short, self-contained world that reads instantly as BBC Two while standing apart from the other films in the launch package. I designed and animated it as a visceral material study — treating the “2” as something alive, tactile and organic rather than graphic, with surface and light doing the work.',
+        'The idents were built to be iterative — refreshed and expanded over time — and tied together by composer Alex Baranowski’s evolving two-note sound signature. Sharing the launch lineup with studios like Aardman, The Mill and FutureDeluxe was a genuine privilege, and the work rolled out across broadcast and digital from the September 2018 launch.',
       ],
       blocks: [],
       credits: [
-        { role: 'Concept, Design & Animation', name: 'Kenneth Robin' },
+        { role: 'Design & Animation', name: 'Kenneth Robin' },
+        { role: 'Agencies', name: 'BBC Creative & Superunion' },
+        { role: 'Sound Design', name: 'Alex Baranowski' },
         { role: 'Brand', name: 'BBC Two' },
+      ],
+    },
+  },
+  {
+    slug: 'hulu-in-bloom',
+    title: 'In Bloom',
+    client: 'Hulu',
+    year: '2024',
+    role: 'VFX Supervision, Design & Animation',
+    blurb:
+      'Hulu’s 2024 Black History Month campaign for its “Black Stories Always” platform — set VFX supervision and the design and animation of the blooming graphic elements, shot on the Disney lot.',
+    media: ['/media/hulu-in-bloom/case/bts-01.jpg'],
+    tone: '#0f1a12',
+    study: {
+      lead: '/media/hulu-in-bloom/case/loop.mp4',
+      intro: [
+        'Hulu brought me on to help create its 2024 Black History Month campaign for the “Black Stories Always” platform — a celebration built on a simple, resonant idea: like flowers, Black stories are ever-present, always growing, always in bloom. The work ran across Hulu and the wider Disney bundle through February, anchoring the streamer’s year-round commitment to Black storytelling.',
+        'I worked as set VFX supervisor and led the design and animation of the campaign’s graphic language — the blooming florals, lower thirds and logo treatments that hold the package together. On set I supervised the VFX so the practical photography and the animated elements would marry cleanly in post, then carried that look through into the finished motion design.',
+        'It was shot on Stage 1 — the smaller infinity stage on the Disney lot — which gave us a clean, fully controllable environment to build the world around the talent. A genuinely fun collaboration, and a meaningful one to be part of.',
+      ],
+      blocks: [
+        { kind: 'video', src: '/media/hulu-in-bloom/case/hero.mp4', controls: true, cap: 'The hero film — muted by default; unmute to hear it.' },
+        { kind: 'text', body: ['Behind the scenes on Stage 1 — the smaller infinity stage on the Disney lot.'] },
+        { kind: 'grid', src: [
+          '/media/hulu-in-bloom/case/bts-01.jpg',
+          '/media/hulu-in-bloom/case/bts-02.jpg',
+          '/media/hulu-in-bloom/case/bts-03.jpg',
+          '/media/hulu-in-bloom/case/bts-04.jpg',
+          '/media/hulu-in-bloom/case/bts-05.jpg',
+        ] },
+        { kind: 'videogrid', cap: 'Lower thirds, bumpers and logo animations from the campaign package.', src: [
+          '/media/hulu-in-bloom/case/lower-01.mp4',
+          '/media/hulu-in-bloom/case/lower-02.mp4',
+          '/media/hulu-in-bloom/case/lower-03.mp4',
+          '/media/hulu-in-bloom/case/lower-04.mp4',
+        ] },
+      ],
+      credits: [
+        { role: 'VFX Supervision, Design & Animation', name: 'Kenneth Robin' },
+        { role: 'Production', name: '1stAveMachine' },
+        { role: 'Client', name: 'Hulu — Black Stories Always' },
       ],
     },
   },
@@ -147,6 +197,7 @@ export const projects: Project[] = [
       'A self-initiated character and world-building study — chrome, neon and worn futures rendered as a series of stills and motion tests.',
     media: m('cybrpnk', 5),
     tone: '#101421',
+    hidden: true,
   },
   {
     slug: 'bmw',
@@ -158,6 +209,7 @@ export const projects: Project[] = [
       'Spatial design frames for a BMW brand experience — light-driven rooms exploring the future of the marque.',
     media: m('bmw', 4),
     tone: '#0c111a',
+    hidden: true,
   },
   {
     slug: 'falling-waters',
@@ -169,6 +221,7 @@ export const projects: Project[] = [
       'Water suspended over Manhattan — a CG short exploring scale and weightlessness in a familiar skyline.',
     media: m('falling-waters', 5),
     tone: '#0e1418',
+    hidden: true,
   },
   {
     slug: 'faraday',
@@ -180,6 +233,7 @@ export const projects: Project[] = [
       'Launch-film design for Faraday Future at CES — exploded views, battery reveals and data-car visualizations.',
     media: m('faraday', 4),
     tone: '#0a0f14',
+    hidden: true,
   },
   {
     slug: 'spotify-yim',
@@ -191,6 +245,7 @@ export const projects: Project[] = [
       'Campaign design for Spotify’s Year in Music — typographic systems built around the year’s defining artists.',
     media: m('spotify-yim', 4),
     tone: '#160a18',
+    hidden: true,
   },
   {
     slug: 'xbox-what-if',
@@ -202,6 +257,7 @@ export const projects: Project[] = [
       'Concept design for Xbox — album-art worlds and console cutaways imagining the machine from the inside out.',
     media: m('xbox-what-if', 4),
     tone: '#0a1410',
+    hidden: true,
   },
   {
     slug: 'air-jordan-xxxi',
@@ -213,6 +269,7 @@ export const projects: Project[] = [
       'Product-film renders for the Air Jordan XXXI — studio light studies on a familiar silhouette.',
     media: m('air-jordan-xxxi', 2),
     tone: '#140c0a',
+    hidden: true,
   },
   {
     slug: 'squarespace',
@@ -225,6 +282,7 @@ export const projects: Project[] = [
     media: m('squarespace', 1),
     video: 'https://player.vimeo.com/video/154650574',
     tone: '#0d0d10',
+    hidden: true,
   },
 ];
 

@@ -509,8 +509,22 @@ body::after {
   align-self: center;
 }
 .case__credit dd { color: rgba(255, 255, 255, 0.9); text-align: right; }
+/* Video grid — looping lower thirds / bumpers in uniform square cells.
+   Mixed ratios (1:1, 9:16) are contained, not cropped, so text reads. */
+.case__vgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--grid-gap);
+}
+.case__vcell {
+  aspect-ratio: 1 / 1;
+  background: #0a0a0c;
+  overflow: hidden;
+}
+.case__vcellvid { width: 100%; height: 100%; object-fit: contain; display: block; }
 @media (max-width: 700px) {
   .case__grid { grid-template-columns: repeat(2, 1fr); }
+  .case__vgrid { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* ---- Scroll reveal --------------------------------------------

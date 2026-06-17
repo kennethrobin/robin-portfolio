@@ -273,7 +273,12 @@ if (!reducedMotion) {
    that follows the cursor; clicking opens the modal. No copy on
    the scroll — detail lives in the modal only.                   */
 const worklist = document.querySelector<HTMLOListElement>('[data-worklist]')!;
-worklist.innerHTML = projects.map((p, i) => `
+// Keep the original index in data-i (so hover preview + modal still map
+// to projects[i]) while hiding any project flagged hidden.
+worklist.innerHTML = projects
+  .map((p, i) => ({ p, i }))
+  .filter(({ p }) => !p.hidden)
+  .map(({ p, i }) => `
   <li>
     <button class="workrow" data-i="${i}" aria-haspopup="dialog">
       <span class="workrow__title">${p.title}</span>
@@ -327,10 +332,18 @@ function renderStudy(p: Project): string {
         return `<div class="case__text">${b.body.map((t) => `<p>${t}</p>`).join('')}</div>`;
       case 'image':
         return `<figure class="case__media"><img loading="lazy" src="${b.src}" alt="${p.title} — ${p.client}" />${b.cap ? `<figcaption class="case__cap caption">${b.cap}</figcaption>` : ''}</figure>`;
-      case 'video':
-        return `<figure class="case__media">${loopVideo(b.src, 'case__video', `${p.title} — behind the scenes`)}${b.cap ? `<figcaption class="case__cap caption">${b.cap}</figcaption>` : ''}</figure>`;
+      case 'video': {
+        // controls:true lets the viewer unmute / scrub; still autoplays muted + loops.
+        const ctrl = b.controls ? ' controls' : '';
+        const vid = `<video class="case__video" src="${b.src}" autoplay muted loop playsinline preload="metadata"${ctrl} aria-label="${p.title} — ${p.client}"></video>`;
+        return `<figure class="case__media">${vid}${b.cap ? `<figcaption class="case__cap caption">${b.cap}</figcaption>` : ''}</figure>`;
+      }
       case 'grid':
         return `<div class="case__grid">${b.src.map((src) => `<div class="case__cell"><img loading="lazy" src="${src}" alt="${p.title} detail" /></div>`).join('')}</div>`;
+      case 'videogrid': {
+        const cells = b.src.map((src) => `<div class="case__vcell">${loopVideo(src, 'case__vcellvid', `${p.title} element`)}</div>`).join('');
+        return `<figure class="case__media"><div class="case__vgrid">${cells}</div>${b.cap ? `<figcaption class="case__cap caption">${b.cap}</figcaption>` : ''}</figure>`;
+      }
     }
   }).join('');
   const credits = s.credits
