@@ -356,10 +356,11 @@ function renderStudy(p: Project): string {
     .map((c) => `<div class="case__credit"><dt>${c.role}</dt><dd>${c.name}</dd></div>`)
     .join('');
   // Lead film: a remote embed (Vimeo) plays in an iframe; a local
-  // file plays as a muted, looping inline video.
+  // file plays as a muted, looping inline video (with controls when
+  // leadControls is set, so the viewer can unmute / scrub).
   const lead = /^https?:/.test(s.lead)
     ? `<iframe class="case__lead case__lead--embed" src="${s.lead}?autoplay=1&muted=1&loop=1&title=0&byline=0" allow="autoplay; fullscreen" title="${p.title} — ${p.client}"></iframe>`
-    : loopVideo(s.lead, 'case__lead', `${p.title} — ${p.client}`);
+    : `<video class="case__lead" src="${s.lead}" autoplay muted loop playsinline preload="metadata"${s.leadControls ? ' controls' : ''} aria-label="${p.title} — ${p.client}"></video>`;
   return `
     ${lead}
     <div class="modal__meta caption"><span>${p.client}</span><span>${p.year}</span><span>${p.role}</span></div>

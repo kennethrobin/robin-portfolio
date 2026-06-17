@@ -66,6 +66,10 @@ export type StudyBlock =
 export interface Study {
   /* Looping local .mp4 shown first, full-bleed, on the detail page. */
   lead: string;
+  /* When true, the local lead film shows native controls so the
+     viewer can unmute / scrub (still autoplays muted + loops).
+     Ignored for remote (Vimeo) leads, which use their own player. */
+  leadControls?: boolean;
   /* Long-form, first-person intro paragraphs under the lead film. */
   intro: string[];
   /* Everything below the intro, in display order. */
@@ -185,6 +189,50 @@ export const projects: Project[] = [
         { role: 'Director', name: 'Steven Mosley' },
         { role: 'Production', name: 'HollandWest Productions' },
         { role: 'Client', name: 'Hulu — Black Stories Always' },
+      ],
+    },
+  },
+  {
+    slug: 'hip-hop-uncovered',
+    title: 'Hip Hop Uncovered',
+    client: 'FX',
+    year: '2021',
+    role: 'Broadcast Design, Animation',
+    blurb:
+      'On-air graphics and title package for FX’s six-part docuseries on hip hop’s behind-the-scenes power brokers — a raw, type-driven motion system of IDs, era stamps, city locators and lyric cards.',
+    media: ['/media/hip-hop-uncovered/case/still-hero.webp'],
+    tone: '#140a0a',
+    study: {
+      lead: '/media/hip-hop-uncovered/case/hero.mp4',
+      leadControls: true,
+      intro: [
+        'Hip Hop Uncovered is FX’s six-part documentary series that tells the story of hip hop from the streets up — following five of the behind-the-scenes power brokers who shaped the culture across 40 years of music history. I designed and animated the show’s on-air graphics package: the title treatment and the system of cards that carry the storytelling through all six episodes — era and date stamps, city locators, and on-screen lyric callouts.',
+        'The look had to feel like the culture it was documenting — raw, bold and unmistakably built from the street up rather than polished from the top down. I developed a type-driven motion language that could cut hard against decades of archival footage, photographs and interviews without ever softening the edge.',
+        'The package threaded the series’ three layers — the people, the music, and the America around them — into a single visual voice that ran across every episode on FX and Hulu.',
+      ],
+      blocks: [
+        { kind: 'video', src: '/media/hip-hop-uncovered/case/reel.mp4', controls: true, cap: 'Highlight reel — muted by default; unmute to hear it.' },
+        { kind: 'image', src: '/media/hip-hop-uncovered/case/still-hero.webp', ratio: '16 / 9' },
+        { kind: 'grid', ratio: '16 / 9', src: [
+          '/media/hip-hop-uncovered/case/still-01.webp',
+          '/media/hip-hop-uncovered/case/still-02.webp',
+          '/media/hip-hop-uncovered/case/still-03.webp',
+          '/media/hip-hop-uncovered/case/still-04.webp',
+          '/media/hip-hop-uncovered/case/still-05.webp',
+          '/media/hip-hop-uncovered/case/still-06.webp',
+          '/media/hip-hop-uncovered/case/still-07.jpg',
+          '/media/hip-hop-uncovered/case/still-08.webp',
+          '/media/hip-hop-uncovered/case/still-09.webp',
+          '/media/hip-hop-uncovered/case/still-10.webp',
+          '/media/hip-hop-uncovered/case/still-11.webp',
+          '/media/hip-hop-uncovered/case/still-12.webp',
+        ] },
+      ],
+      credits: [
+        { role: 'Broadcast Design & Animation', name: 'Kenneth Robin' },
+        { role: 'Series Director', name: 'Rashidi Natara Harper' },
+        { role: 'Production', name: 'Lightbox' },
+        { role: 'Network', name: 'FX (Hulu)' },
       ],
     },
   },
