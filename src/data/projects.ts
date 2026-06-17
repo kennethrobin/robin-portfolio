@@ -404,6 +404,8 @@ export const labs = {
   items: [
     '/media/labs/labs-01.jpg',
     '/media/labs/labs-02.png',
+    '/media/labs/labs-28.mp4',   // windtunnel_test — top-right (3rd in a 3-col grid)
+    '/media/labs/labs-17.mp4',   // k_tear — 4th
     '/media/labs/labs-03.png',
     '/media/labs/labs-04.png',
     '/media/labs/labs-05.jpg',
@@ -418,7 +420,6 @@ export const labs = {
     '/media/labs/labs-14.jpg',
     '/media/labs/labs-15.jpg',
     '/media/labs/labs-16.webp',
-    '/media/labs/labs-17.mp4',
     '/media/labs/labs-18.webp',
     '/media/labs/labs-19.webp',
     '/media/labs/labs-20.jpg',
@@ -429,7 +430,6 @@ export const labs = {
     '/media/labs/labs-25.jpg',
     '/media/labs/labs-26.gif',
     '/media/labs/labs-27.gif',
-    '/media/labs/labs-28.mp4',
     '/media/labs/labs-29.webp',
   ],
 };

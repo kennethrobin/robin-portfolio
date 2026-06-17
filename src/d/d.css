@@ -532,15 +532,18 @@ body::after {
   .case__vgrid { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* ---- Labs gallery (masonry dump of mixed images + loops) ----- */
+/* ---- Labs gallery (mixed images + loops) ---------------------
+   Row-major grid so order is predictable: item 3 = top-right,
+   item 4 = start of row 2, etc. Items keep their aspect ratio. */
 .labs__grid {
   margin-top: clamp(40px, 7vh, 80px);
-  columns: 3 260px;              /* up to 3 columns, each >= 260px */
-  column-gap: var(--grid-gap);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--grid-gap);
+  align-items: start;
 }
-.labs__item { break-inside: avoid; margin-bottom: var(--grid-gap); }
 .labs__media { width: 100%; height: auto; display: block; background: #0a0a0c; }
-@media (max-width: 640px) { .labs__grid { columns: 2 140px; } }
+@media (max-width: 640px) { .labs__grid { grid-template-columns: repeat(2, 1fr); } }
 
 /* ---- Scroll reveal --------------------------------------------
    The hidden state is gated behind .reveal-on (added by JS), so if
