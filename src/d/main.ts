@@ -421,11 +421,15 @@ function closeModal() {
    else (jpg/png/webp/gif) renders as an image. */
 function openLabs() {
   // a fresh shuffle of everything on each open — it's a dump, order is random.
-  const items = shuffle(labs.items).map((src) => {
+  // Repeating rhythm across the grid: 2 across, then 3 across, then 1 big
+  // full-width feature (6-item cycle).
+  const items = shuffle(labs.items).map((src, i) => {
     const media = /\.mp4$/i.test(src)
       ? `<video class="labs__media" src="${src}" autoplay muted loop playsinline preload="metadata"></video>`
       : `<img class="labs__media" loading="lazy" src="${src}" alt="Labs experiment" />`;
-    return `<div class="labs__item">${media}</div>`;
+    const m = i % 6;
+    const cls = m < 2 ? 'labs__item--half' : m < 5 ? 'labs__item--third' : 'labs__item--full';
+    return `<div class="labs__item ${cls}">${media}</div>`;
   }).join('');
   modalInner.innerHTML = `
     <h2 class="modal__title">${labs.title}</h2>
