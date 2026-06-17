@@ -298,10 +298,16 @@ async function advance() {
   await nxt.el.play().catch(() => {});
   await firstFrame(nxt.el);
 
+  // Keep the blend no longer than the time the OUTGOING clip still has to
+  // play (measured now, after the play()/frame wait). Otherwise a short
+  // clip ends mid-blend and freezes on its last frame — the slight pause.
+  const remaining = (isFinite(cur.el.duration) ? cur.el.duration : Infinity) - cur.el.currentTime;
+  const blendDur = Math.min(MODES[mode].dur, Math.max(remaining - 0.08, 0.05));
+
   uniforms.uProgress.value = 0;
   await new Promise<void>((res) => {
     gsap.to(uniforms.uProgress, {
-      value: 1, duration: MODES[mode].dur, ease: MODES[mode].ease, onComplete: () => res(),
+      value: 1, duration: blendDur, ease: MODES[mode].ease, onComplete: () => res(),
     });
   });
 
