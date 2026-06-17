@@ -420,10 +420,8 @@ function closeModal() {
    gallery in the same modal. .mp4 entries loop muted; everything
    else (jpg/png/webp/gif) renders as an image. */
 function openLabs() {
-  // keep the first four pinned (windtunnel 3rd, k_tear 4th); shuffle the
-  // rest fresh on each open so the dump feels alive.
-  const ordered = [...labs.items.slice(0, 4), ...shuffle(labs.items.slice(4))];
-  const items = ordered.map((src) => {
+  // a fresh shuffle of everything on each open — it's a dump, order is random.
+  const items = shuffle(labs.items).map((src) => {
     const media = /\.mp4$/i.test(src)
       ? `<video class="labs__media" src="${src}" autoplay muted loop playsinline preload="metadata"></video>`
       : `<img class="labs__media" loading="lazy" src="${src}" alt="Labs experiment" />`;
@@ -432,7 +430,7 @@ function openLabs() {
   modalInner.innerHTML = `
     <h2 class="modal__title">${labs.title}</h2>
     <div class="case__intro"><p>${labs.blurb}</p></div>
-    <div class="labs__grid" data-labs-grid>${items}</div>`;
+    <div class="labs__grid">${items}</div>`;
   modal.hidden = false;
   modal.scrollTop = 0;
   document.body.style.overflow = 'hidden';
@@ -440,47 +438,7 @@ function openLabs() {
   modalClose.focus();
   gsap.fromTo(modal, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power2.out' });
   gsap.fromTo(modalInner, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'expo.out', delay: 0.05 });
-  layoutLabs();   // pack the masonry as each tile's media loads
 }
-
-/** Size one Labs tile: landscape media spans both columns; the row span
-    is derived from the media's aspect ratio so each column packs gap-free. */
-function sizeLabsItem(item: HTMLElement, grid: HTMLElement) {
-  const media = item.querySelector<HTMLImageElement | HTMLVideoElement>('img, video');
-  if (!media) return;
-  const natW = media instanceof HTMLVideoElement ? media.videoWidth : media.naturalWidth;
-  const natH = media instanceof HTMLVideoElement ? media.videoHeight : media.naturalHeight;
-  if (!natW || !natH) return;
-  const aspect = natW / natH;
-  const cs = getComputedStyle(grid);
-  const cols = cs.gridTemplateColumns.split(' ').filter(Boolean).length;
-  // wide/landscape media spans both columns (only when there are 2 to span)
-  item.classList.toggle('labs__item--wide', cols >= 2 && aspect >= 1.7);
-  const rowH = parseFloat(cs.gridAutoRows) || 8;
-  const gap = parseFloat(cs.rowGap) || 0;
-  const w = item.getBoundingClientRect().width;   // measured after the wide toggle
-  const span = Math.max(1, Math.round((w / aspect + gap) / (rowH + gap)));
-  item.style.gridRowEnd = `span ${span}`;
-}
-
-/** (Re)pack every Labs tile in the open modal, waiting on media that
-    hasn't reported its dimensions yet. */
-function layoutLabs() {
-  const grid = modalInner.querySelector<HTMLElement>('[data-labs-grid]');
-  if (!grid) return;
-  grid.querySelectorAll<HTMLElement>('.labs__item').forEach((item) => {
-    const media = item.querySelector<HTMLImageElement | HTMLVideoElement>('img, video');
-    if (!media) return;
-    const ready = media instanceof HTMLVideoElement
-      ? media.readyState >= 1
-      : media.complete && media.naturalWidth > 0;
-    if (ready) { sizeLabsItem(item, grid); return; }
-    const ev = media instanceof HTMLVideoElement ? 'loadedmetadata' : 'load';
-    media.addEventListener(ev, () => sizeLabsItem(item, grid), { once: true });
-  });
-}
-// keep the masonry packed when the viewport changes while Labs is open
-window.addEventListener('resize', () => { if (!modal.hidden) layoutLabs(); });
 
 worklist.addEventListener('click', (e) => {
   const row = (e.target as HTMLElement).closest<HTMLElement>('.workrow');

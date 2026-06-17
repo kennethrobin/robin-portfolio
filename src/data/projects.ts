@@ -394,10 +394,9 @@ export const site = {
 
 /* ---- Labs — experimental / self-initiated work --------------
    Opened from the top nav as a modal (like a project page). A
-   2-column gap-free masonry of mixed media; .mp4 entries play as
-   muted loops, everything else renders as an image. Wide/landscape
-   items auto-span the full width. The first four are pinned; the
-   rest shuffle on each open. Add/remove paths in public/media/labs/. */
+   2-column column-masonry of mixed media; .mp4 entries play as
+   muted loops, everything else renders as an image. All items are
+   shuffled fresh on each open. Add/remove paths in public/media/labs/. */
 export const labs = {
   title: 'Labs',
   blurb:
@@ -405,8 +404,8 @@ export const labs = {
   items: [
     '/media/labs/labs-01.jpg',
     '/media/labs/labs-02.png',
-    '/media/labs/labs-28.mp4',   // windtunnel_test — top-right (3rd in a 3-col grid)
-    '/media/labs/labs-17.mp4',   // k_tear — 4th
+    '/media/labs/labs-28.mp4',   // windtunnel_test
+    '/media/labs/labs-17.mp4',   // k_tear
     '/media/labs/labs-03.png',
     '/media/labs/labs-04.png',
     '/media/labs/labs-05.jpg',

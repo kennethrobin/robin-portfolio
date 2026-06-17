@@ -532,22 +532,18 @@ body::after {
   .case__vgrid { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* ---- Labs gallery — 2-col gap-free masonry -------------------
-   grid-auto-rows is a fine unit; JS (sizeLabsItem) sets each tile's
-   row span from its media aspect ratio so the columns pack tightly
-   with no gaps. Wide/landscape items span both columns for rhythm. */
+/* ---- Labs gallery — 2-col column masonry --------------------
+   CSS multicol packs each tile at its NATURAL height, so columns
+   fill with no gaps and images are never cropped. Bigger tiles
+   (2 columns); collapses to 1 column on narrow screens. */
 .labs__grid {
   margin-top: clamp(40px, 7vh, 80px);
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-auto-rows: 8px;
-  grid-auto-flow: row dense;
-  gap: var(--grid-gap);
+  columns: 2;
+  column-gap: var(--grid-gap);
 }
-.labs__item { overflow: hidden; grid-row: span 24; }   /* span 24 = pre-load placeholder */
-.labs__item--wide { grid-column: 1 / -1; }
-.labs__media { width: 100%; height: 100%; object-fit: cover; display: block; background: #0a0a0c; }
-@media (max-width: 560px) { .labs__grid { grid-template-columns: 1fr; } }
+.labs__item { break-inside: avoid; margin-bottom: var(--grid-gap); }
+.labs__media { width: 100%; height: auto; display: block; background: #0a0a0c; }
+@media (max-width: 560px) { .labs__grid { columns: 1; } }
 
 /* ---- Scroll reveal --------------------------------------------
    The hidden state is gated behind .reveal-on (added by JS), so if
