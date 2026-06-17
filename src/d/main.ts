@@ -304,7 +304,11 @@ worklist.addEventListener('pointerover', (e) => {
   const i = Number(row.dataset.i);
   if (i === shownIdx) return;
   shownIdx = i;
-  previewImg.src = projects[i].media[0];
+  // Some projects (e.g. film-only case studies) have no still — skip the
+  // cursor preview rather than showing a broken image.
+  const thumb = projects[i].media[0];
+  if (!thumb) { gsap.to(preview, { opacity: 0, duration: 0.2 }); return; }
+  previewImg.src = thumb;
   gsap.to(preview, { opacity: 1, scale: 1, duration: 0.4, ease: 'power3.out' });
 });
 worklist.addEventListener('pointerleave', () => {
@@ -347,7 +351,8 @@ function renderStudy(p: Project): string {
         return `<div class="case__grid">${b.src.map((src) => `<div class="case__cell"${cellStyle}><img loading="lazy" src="${src}" alt="${p.title} detail" /></div>`).join('')}</div>`;
       }
       case 'videogrid': {
-        const cells = b.src.map((src) => `<div class="case__vcell">${loopVideo(src, 'case__vcellvid', `${p.title} element`)}</div>`).join('');
+        const cellStyle = b.ratio ? ` style="aspect-ratio:${b.ratio}"` : '';
+        const cells = b.src.map((src) => `<div class="case__vcell"${cellStyle}>${loopVideo(src, 'case__vcellvid', `${p.title} element`)}</div>`).join('');
         return `<figure class="case__media"><div class="case__vgrid">${cells}</div>${b.cap ? `<figcaption class="case__cap caption">${b.cap}</figcaption>` : ''}</figure>`;
       }
     }

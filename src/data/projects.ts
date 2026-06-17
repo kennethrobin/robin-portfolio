@@ -61,7 +61,7 @@ export type StudyBlock =
   | { kind: 'image'; src: string; cap?: string; ratio?: string }
   | { kind: 'grid'; src: string[]; ratio?: string }
   | { kind: 'video'; src: string; cap?: string; controls?: boolean }
-  | { kind: 'videogrid'; src: string[]; cap?: string };
+  | { kind: 'videogrid'; src: string[]; cap?: string; ratio?: string };
 
 export interface Study {
   /* Looping local .mp4 shown first, full-bleed, on the detail page. */
@@ -231,6 +231,53 @@ export const projects: Project[] = [
       credits: [
         { role: 'Broadcast Design & Animation', name: 'Kenneth Robin' },
         { role: 'Client', name: 'FX Networks' },
+      ],
+    },
+  },
+  {
+    slug: 'aiga-revival',
+    title: 'AIGA Revival',
+    client: 'AIGA',
+    year: '2015',
+    role: 'Direction, Design, Animation',
+    blurb:
+      'Title films for the 2015 AIGA Design Conference in New Orleans — my hometown. Through IAAH, I directed, designed and animated the main film and the speaker bumpers for a conference themed on the city’s revival.',
+    media: [],
+    tone: '#160a10',
+    study: {
+      lead: '/media/aiga-revival/case/hero.mp4',
+      leadControls: true,
+      intro: [
+        '“Revival” was the theme of the 2015 AIGA Design Conference, held in New Orleans — my hometown. Chosen to mark ten years since Hurricane Katrina, it spoke to rebirth, regrowth and rebuilding: honoring the city’s past while looking to its future. Through IAAH (iamalwayshungry), I directed, designed and animated the conference’s title films — the main film and the speaker bumpers that opened the stage for every guest.',
+        'We built the look around the iconography of New Orleans — lush florals, brass, and the spirit of a second line — shooting in the city itself and weaving the conference’s hand-built typeface and visual system into a living, celebratory open.',
+        'For me it was personal: my city telling its own story of revival. The films played to thousands of designers and many of the field’s most influential voices — Michael Bierut, Roman Mars, Karin Fong and dozens more — as the bumpers introduced each of them to the stage.',
+      ],
+      blocks: [
+        { kind: 'videogrid', ratio: '16 / 9', cap: 'Speaker bumpers — an opening film for each conference guest.', src: [
+          '/media/aiga-revival/case/bumper-01.mp4',
+          '/media/aiga-revival/case/bumper-02.mp4',
+          '/media/aiga-revival/case/bumper-03.mp4',
+          '/media/aiga-revival/case/bumper-04.mp4',
+          '/media/aiga-revival/case/bumper-05.mp4',
+          '/media/aiga-revival/case/bumper-06.mp4',
+          '/media/aiga-revival/case/bumper-07.mp4',
+          '/media/aiga-revival/case/bumper-08.mp4',
+          '/media/aiga-revival/case/bumper-09.mp4',
+          '/media/aiga-revival/case/bumper-10.mp4',
+        ] },
+        { kind: 'video', src: '/media/aiga-revival/case/trombone.mp4', controls: true, cap: 'Trombone interlude — muted by default; unmute to hear it.' },
+        { kind: 'video', src: '/media/aiga-revival/case/credits.mp4', controls: true, cap: 'Closing credit roll.' },
+      ],
+      credits: [
+        { role: 'Director, Design & Animation', name: 'Kenneth Robin' },
+        { role: 'Studio', name: 'IAAH (iamalwayshungry)' },
+        { role: 'Creative Direction', name: 'Nessim Higson' },
+        { role: 'Art Direction', name: 'Taylor Bourdeaux' },
+        { role: 'Design & Typeface', name: 'Brandon Washington' },
+        { role: 'Animation', name: 'Joe Fleming' },
+        { role: 'Director of Photography', name: 'Mike Kennedy' },
+        { role: 'Sound Design', name: 'Joe Johnson & Linton Smith' },
+        { role: 'Client', name: 'AIGA' },
       ],
     },
   },
