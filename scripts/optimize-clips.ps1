@@ -3,13 +3,15 @@
 #   A) re-encode: H.264 CRF 26, fit within 1080p, audio stripped, +faststart
 #   B) remux:     copy video as-is, audio stripped, +faststart (no quality loss)
 # A wins on high-bitrate / high-res sources; B wins on already-efficient ones.
-# Writes results to public/clips/ as NN.mp4 and regenerates src/data/clips.ts.
+# Reads from videoclips/reel/, writes results to public/clips/ as NN.mp4 and
+# regenerates src/data/clips.ts. This is the heavier alternative to
+# sync-clips.ps1 (which just copies) and requires ffmpeg.
 # Requires ffmpeg (pass -Ffmpeg <path> or rely on the portable default).
 
 param([string]$Ffmpeg = "$env:LOCALAPPDATA\ffmpeg\ffmpeg-master-latest-win64-gpl\bin\ffmpeg.exe")
 
 $root = Split-Path $PSScriptRoot -Parent
-$src  = Join-Path $root 'videoclips'
+$src  = Join-Path $root 'videoclips\reel'
 $dest = Join-Path $root 'public\clips'
 
 if (-not (Test-Path -LiteralPath $Ffmpeg)) { Write-Error "ffmpeg not found at $Ffmpeg"; exit 1 }
