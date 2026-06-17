@@ -41,7 +41,19 @@ const MODES = [
   { name: 'Glitch', dur: 0.45, ease: 'power2.inOut' },  // 1 sliced RGB-split
   { name: 'Hard',   dur: 0.05, ease: 'none' },          // 2 instant hard cut
 ];
-let lastMode = -1;   // avoid firing the same transition twice in a row
+
+// The next transition is decided AHEAD of each cut, so we can start it
+// early enough that the outgoing clip is still playing through the blend
+// (no freeze-frame pause). lastMode avoids two of the same in a row.
+let lastMode = -1;
+let nextMode = 0;
+function pickNextMode() {
+  let m = Math.floor(Math.random() * MODES.length);
+  if (m === lastMode) m = (m + 1) % MODES.length;
+  lastMode = m;
+  nextMode = m;
+}
+pickNextMode();
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -216,6 +228,7 @@ gsap.ticker.add(() => {
 const taphint = document.querySelector<HTMLElement>('[data-taphint]')!;
 let unlocked = false;
 let transitioning = false;
+let cutScheduled = false;   // true once a cut has been kicked off for the current clip
 
 /** First touch on phones that block autoplay: start the reel and
     "bless" the next slot so later programmatic play() calls work. */
@@ -229,23 +242,61 @@ function unlockPlayback() {
 window.addEventListener('pointerdown', unlockPlayback);
 window.addEventListener('touchstart', unlockPlayback, { passive: true });
 
+/** Resolve once the video has actually painted a fresh frame, so the
+    incoming clip is never blended in as a frozen first frame. Falls back
+    to a short timeout if rVFC is unavailable or playback is blocked. */
+function firstFrame(el: HTMLVideoElement, timeout = 200): Promise<void> {
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = () => { if (!done) { done = true; resolve(); } };
+    const v = el as unknown as { requestVideoFrameCallback?: (cb: () => void) => number };
+    if (typeof v.requestVideoFrameCallback === 'function') v.requestVideoFrameCallback(finish);
+    else requestAnimationFrame(finish);
+    setTimeout(finish, timeout);   // never stall the reel if no frame arrives
+  });
+}
+
+/** Clip-end safety net: if the frame-accurate scheduler ever misses the
+    cut (e.g. a backgrounded tab throttled the ticker), cut as soon as the
+    clip ends so the reel never stalls on a finished video. */
+function onEnded() {
+  if (!transitioning) advance();
+}
+
+/** Frame-accurate scheduler (run every render frame): begin the cut a
+    little BEFORE the current clip ends so the outgoing clip is still
+    playing through the blend — no freeze-frame pause. The next mode is
+    chosen ahead of time so we know how long its blend lasts. */
+function maybeScheduleCut() {
+  if (reducedMotion || transitioning || cutScheduled) return;
+  const el = cur.el;
+  const d = el.duration;
+  if (el.paused || !isFinite(d) || d <= 0) return;
+  const lead = Math.min(MODES[nextMode].dur + 0.15, d * 0.5);
+  if (el.currentTime >= d - lead) {
+    cutScheduled = true;
+    advance();
+  }
+}
+
 /** Run a transition to the preloaded next clip, then promote it.
-    Called on clip-end, or on demand from the dev picker. */
+    Triggered by the scheduler above (or the ended safety net). */
 async function advance() {
   if (transitioning) return;
   transitioning = true;
+  cutScheduled = true;
 
-  // random style, but never the same one twice in a row
-  let mode = Math.floor(Math.random() * MODES.length);
-  if (mode === lastMode) mode = (mode + 1) % MODES.length;
-  lastMode = mode;
+  const mode = nextMode;                 // decided ahead of the cut
   uniforms.uMode.value = mode;
   uniforms.uSeed.value = Math.random() * 100;
 
+  // Bring the incoming clip up to speed and wait for a real decoded frame
+  // BEFORE the blend starts, so it never flashes a frozen first frame.
   uniforms.uTo.value = nxt.tex;
   uniforms.uAspectTo.value = aspectOf(nxt);
   nxt.el.currentTime = 0;
   await nxt.el.play().catch(() => {});
+  await firstFrame(nxt.el);
 
   uniforms.uProgress.value = 0;
   await new Promise<void>((res) => {
@@ -255,16 +306,18 @@ async function advance() {
   });
 
   // promote nxt -> cur; the old slot is freed to preload the next clip
-  cur.el.removeEventListener('ended', advance);
+  cur.el.removeEventListener('ended', onEnded);
   cur.el.pause();
   [cur, nxt] = [nxt, cur];
   uniforms.uFrom.value = cur.tex;
   uniforms.uAspectFrom.value = aspectOf(cur);
   uniforms.uTo.value = cur.tex;
   uniforms.uProgress.value = 0;
-  cur.el.addEventListener('ended', advance);
+  cur.el.addEventListener('ended', onEnded);
   pos = nextPos();
   transitioning = false;
+  cutScheduled = false;
+  pickNextMode();                        // choose the next blend (sets its lead time)
 
   loadInto(nxt, playlist[nextPos()]);   // queue the clip after this one
 }
@@ -283,7 +336,7 @@ async function startReel() {
 
   await cur.el.play().catch(() => {});
   if (cur.el.paused && !unlocked) taphint.hidden = false;  // autoplay blocked
-  cur.el.addEventListener('ended', advance);
+  cur.el.addEventListener('ended', onEnded);
   loadInto(nxt, playlist[nextPos()]);    // preload the next clip
 }
 startReel();
