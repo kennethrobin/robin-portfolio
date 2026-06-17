@@ -73,7 +73,7 @@ const m = (slug: string, count: number): string[] =>
 export const projects: Project[] = [
   {
     slug: 'att-discovery-district',
-    title: 'Discovery District',
+    title: 'AT&T Discovery District',
     client: 'AT&T',
     year: '2021',
     role: 'Creative Direction, Design',
