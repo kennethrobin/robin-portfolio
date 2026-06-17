@@ -420,7 +420,10 @@ function closeModal() {
    gallery in the same modal. .mp4 entries loop muted; everything
    else (jpg/png/webp/gif) renders as an image. */
 function openLabs() {
-  const items = labs.items.map((src) => {
+  // keep the first four pinned (windtunnel 3rd, k_tear 4th); shuffle the
+  // rest fresh on each open so the dump feels alive.
+  const ordered = [...labs.items.slice(0, 4), ...shuffle(labs.items.slice(4))];
+  const items = ordered.map((src) => {
     const media = /\.mp4$/i.test(src)
       ? `<video class="labs__media" src="${src}" autoplay muted loop playsinline preload="metadata"></video>`
       : `<img class="labs__media" loading="lazy" src="${src}" alt="Labs experiment" />`;
