@@ -411,7 +411,6 @@ export const labs = {
     '/media/labs/labs-05.jpg',
     '/media/labs/labs-06.webp',
     '/media/labs/labs-07.webp',
-    '/media/labs/labs-08.jpg',
     '/media/labs/labs-09.jpg',
     '/media/labs/labs-10.webp',
     '/media/labs/labs-11.webp',
