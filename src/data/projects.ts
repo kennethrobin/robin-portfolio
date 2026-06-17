@@ -166,12 +166,12 @@ export const projects: Project[] = [
       blocks: [
         { kind: 'video', src: '/media/hulu-in-bloom/case/hero.mp4', controls: true, cap: 'The hero film — muted by default; unmute to hear it.' },
         { kind: 'text', body: ['Behind the scenes on Stage 1 — the smaller infinity stage on the Disney lot.'] },
+        { kind: 'image', src: '/media/hulu-in-bloom/case/bts-05.jpg' },
         { kind: 'grid', src: [
           '/media/hulu-in-bloom/case/bts-01.jpg',
           '/media/hulu-in-bloom/case/bts-02.jpg',
           '/media/hulu-in-bloom/case/bts-03.jpg',
           '/media/hulu-in-bloom/case/bts-04.jpg',
-          '/media/hulu-in-bloom/case/bts-05.jpg',
         ] },
         { kind: 'videogrid', cap: 'Lower thirds, bumpers and logo animations from the campaign package.', src: [
           '/media/hulu-in-bloom/case/lower-01.mp4',
