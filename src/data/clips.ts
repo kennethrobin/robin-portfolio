@@ -17,4 +17,5 @@ export const heroClips: string[] = [
   '/clips/13.mp4',
   '/clips/14.mp4',
   '/clips/15.mp4',
+  '/clips/16.mp4',
 ];
