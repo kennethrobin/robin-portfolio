@@ -154,7 +154,7 @@ export const projects: Project[] = [
     role: 'VFX Supervision, Design & Animation',
     blurb:
       'Hulu’s 2024 Black History Month campaign for its “Black Stories Always” platform — set VFX supervision and the design and animation of the blooming graphic elements, shot on the Disney lot.',
-    media: ['/media/hulu-in-bloom/case/bts-01.jpg'],
+    media: ['/media/hulu-in-bloom/case/thumb.jpg'],
     tone: '#0f1a12',
     study: {
       lead: '/media/hulu-in-bloom/case/loop.mp4',
