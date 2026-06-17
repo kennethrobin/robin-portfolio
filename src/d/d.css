@@ -365,8 +365,10 @@ body::after {
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: rgba(5, 5, 5, 0.97);
-  backdrop-filter: blur(8px);
+  /* Near-opaque so the close button can stay truly fixed: a
+     backdrop-filter would establish a containing block for the
+     fixed-position close button, making it scroll with content. */
+  background: rgba(5, 5, 5, 0.985);
   color: #fff;
   overflow-y: auto;
   overscroll-behavior: contain;
