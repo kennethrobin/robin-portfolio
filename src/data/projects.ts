@@ -182,7 +182,8 @@ export const projects: Project[] = [
       ],
       credits: [
         { role: 'VFX Supervision, Design & Animation', name: 'Kenneth Robin' },
-        { role: 'Production', name: '1stAveMachine' },
+        { role: 'Director', name: 'Steven Mosley' },
+        { role: 'Production', name: 'HollandWest Productions' },
         { role: 'Client', name: 'Hulu — Black Stories Always' },
       ],
     },
