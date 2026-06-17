@@ -30,10 +30,18 @@ import { initWordmark } from '../shared/wordmark';
    ever load (the one on screen + the one preloading), so we never
    download all the clips at once.                                  */
 const CLIP = {
-  fade: 0.45,   // transition duration (seconds)
-  glitch: 1.0,  // 0 = clean dissolve, 1 = full sliced / RGB-split glitch cut
   grain: 0.05,  // constant film grain (0 = clean)
 };
+
+/* ---- Reel transitions ---------------------------------------------
+   The cut between clips is a random pick of these three (see the shader
+   for how each is drawn). `dur` is seconds, `ease` is a GSAP ease. */
+const MODES = [
+  { name: 'Luma',   dur: 0.85, ease: 'power1.inOut' },  // 0 filmic luminance reveal
+  { name: 'Glitch', dur: 0.45, ease: 'power2.inOut' },  // 1 sliced RGB-split
+  { name: 'Hard',   dur: 0.05, ease: 'none' },          // 2 instant hard cut
+];
+let lastMode = -1;   // avoid firing the same transition twice in a row
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -92,8 +100,8 @@ const uniforms = {
   uAspectFrom: { value: 16 / 9 },
   uAspectTo: { value: 16 / 9 },
   uScreen: { value: innerWidth / innerHeight },
-  uMix: { value: 0 },
-  uGlitch: { value: 0 },
+  uProgress: { value: 0 },                       // 0..1 across a transition
+  uMode: { value: 0 },                           // which MODES style is playing
   uSeed: { value: 1 },
   uTime: { value: 0 },
   uGrain: { value: CLIP.grain },
@@ -111,11 +119,23 @@ const screenMat = new THREE.ShaderMaterial({
   fragmentShader: /* glsl */ `
     uniform sampler2D uFrom, uTo;
     uniform float uAspectFrom, uAspectTo, uScreen;
-    uniform float uMix, uGlitch, uSeed, uTime, uGrain;
+    uniform float uProgress, uMode, uSeed, uTime, uGrain;
     varying vec2 vUv;
 
-    float hash(vec2 p) {
-      return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+    float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+
+    // smooth value noise + fbm — used by the luma transition
+    float vnoise(vec2 p) {
+      vec2 i = floor(p), f = fract(p);
+      float a = hash(i), b = hash(i + vec2(1.0, 0.0));
+      float c = hash(i + vec2(0.0, 1.0)), d = hash(i + vec2(1.0, 1.0));
+      vec2 u = f * f * (3.0 - 2.0 * f);
+      return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+    }
+    float fbm(vec2 p) {
+      float v = 0.0, a = 0.5;
+      for (int i = 0; i < 4; i++) { v += a * vnoise(p); p *= 2.0; a *= 0.5; }
+      return v;
     }
 
     // CSS object-fit: cover, in shader form
@@ -125,30 +145,41 @@ const screenMat = new THREE.ShaderMaterial({
       else d.x *= screenAspect / texAspect;
       return d + 0.5;
     }
+    vec3 sFrom(vec2 uv) { return texture2D(uFrom, coverUV(uv, uAspectFrom, uScreen)).rgb; }
+    vec3 sTo(vec2 uv)   { return texture2D(uTo,   coverUV(uv, uAspectTo,   uScreen)).rgb; }
 
     void main() {
       vec2 uv = vUv;
-
-      // punch-zoom during the cut
-      uv = 0.5 + (uv - 0.5) * (1.0 - 0.05 * uGlitch);
-
-      // horizontal slice tearing
-      float slice = floor(uv.y * 28.0);
-      float n = hash(vec2(slice, uSeed));
-      uv.x += (n - 0.5) * 0.22 * uGlitch;
-
-      // per-slice ragged blend edge
-      float m = clamp(uMix + (n - 0.5) * 0.9 * uGlitch, 0.0, 1.0);
-
-      // RGB split, strongest mid-cut
-      float off = 0.014 * uGlitch;
-      vec2 uvA = coverUV(uv, uAspectFrom, uScreen);
-      vec2 uvB = coverUV(uv, uAspectTo, uScreen);
-
+      float p = uProgress;
+      int mode = int(uMode + 0.5);
       vec3 col;
-      col.r = mix(texture2D(uFrom, uvA + vec2(off, 0.0)).r, texture2D(uTo, uvB + vec2(off, 0.0)).r, m);
-      col.g = mix(texture2D(uFrom, uvA).g, texture2D(uTo, uvB).g, m);
-      col.b = mix(texture2D(uFrom, uvA - vec2(off, 0.0)).b, texture2D(uTo, uvB - vec2(off, 0.0)).b, m);
+
+      if (mode == 0) {
+        // LUMA — incoming reveals through a brightness + grain threshold
+        float n = fbm(uv * 4.0 + uSeed);
+        float lum = dot(sFrom(uv), vec3(0.299, 0.587, 0.114));
+        float key = lum * 0.6 + n * 0.4;
+        float th = mix(-0.15, 1.15, p);
+        float m = smoothstep(th - 0.12, th + 0.12, key);   // 1 = from, 0 = to
+        col = mix(sTo(uv), sFrom(uv), m);
+
+      } else if (mode == 1) {
+        // GLITCH — sliced horizontal tear + RGB split, strongest mid-cut
+        float g = sin(p * 3.14159);
+        float slice = floor(uv.y * 18.0);
+        float n = hash(vec2(slice, uSeed));
+        vec2 uvg = uv;
+        uvg.x += (n - 0.5) * 0.18 * g;
+        float m = clamp(p + (n - 0.5) * 0.7 * g, 0.0, 1.0);
+        float off = 0.012 * g;
+        col.r = mix(sFrom(uvg + vec2(off, 0.0)).r, sTo(uvg + vec2(off, 0.0)).r, m);
+        col.g = mix(sFrom(uvg).g,                   sTo(uvg).g,                   m);
+        col.b = mix(sFrom(uvg - vec2(off, 0.0)).b, sTo(uvg - vec2(off, 0.0)).b, m);
+
+      } else {
+        // HARD — instant cut
+        col = mix(sFrom(uv), sTo(uv), step(0.5, p));
+      }
 
       // constant film grain
       col += (hash(vUv * vec2(1920.0, 1080.0) + fract(uTime) * 60.0) - 0.5) * uGrain;
@@ -198,23 +229,29 @@ function unlockPlayback() {
 window.addEventListener('pointerdown', unlockPlayback);
 window.addEventListener('touchstart', unlockPlayback, { passive: true });
 
-/** Current clip ended → dissolve to the next, promote it, queue more. */
+/** Run a transition to the preloaded next clip, then promote it.
+    Called on clip-end, or on demand from the dev picker. */
 async function advance() {
   if (transitioning) return;
   transitioning = true;
 
+  // random style, but never the same one twice in a row
+  let mode = Math.floor(Math.random() * MODES.length);
+  if (mode === lastMode) mode = (mode + 1) % MODES.length;
+  lastMode = mode;
+  uniforms.uMode.value = mode;
+  uniforms.uSeed.value = Math.random() * 100;
+
   uniforms.uTo.value = nxt.tex;
   uniforms.uAspectTo.value = aspectOf(nxt);
-  uniforms.uSeed.value = Math.random() * 100;   // fresh tear pattern each cut
   nxt.el.currentTime = 0;
   await nxt.el.play().catch(() => {});
 
-  // glitch cut: blend across while a sliced RGB-split tears, then settles
+  uniforms.uProgress.value = 0;
   await new Promise<void>((res) => {
-    gsap.timeline({ onComplete: () => res() })
-      .to(uniforms.uMix, { value: 1, duration: CLIP.fade, ease: 'power3.inOut' }, 0)
-      .to(uniforms.uGlitch, { value: CLIP.glitch, duration: CLIP.fade * 0.4, ease: 'power2.in' }, 0)
-      .to(uniforms.uGlitch, { value: 0, duration: CLIP.fade * 0.6, ease: 'power3.out' }, CLIP.fade * 0.4);
+    gsap.to(uniforms.uProgress, {
+      value: 1, duration: MODES[mode].dur, ease: MODES[mode].ease, onComplete: () => res(),
+    });
   });
 
   // promote nxt -> cur; the old slot is freed to preload the next clip
@@ -224,7 +261,7 @@ async function advance() {
   uniforms.uFrom.value = cur.tex;
   uniforms.uAspectFrom.value = aspectOf(cur);
   uniforms.uTo.value = cur.tex;
-  uniforms.uMix.value = 0;
+  uniforms.uProgress.value = 0;
   cur.el.addEventListener('ended', advance);
   pos = nextPos();
   transitioning = false;
