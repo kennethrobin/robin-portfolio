@@ -428,8 +428,6 @@ export const labs = {
     '/media/labs/labs-23.jpg',
     '/media/labs/labs-24.png',
     '/media/labs/labs-25.jpg',
-    '/media/labs/labs-26.gif',
-    '/media/labs/labs-27.gif',
     '/media/labs/labs-29.webp',
     '/media/labs/labs-30.mp4',
   ],
