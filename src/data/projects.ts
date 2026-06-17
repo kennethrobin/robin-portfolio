@@ -58,8 +58,8 @@ export interface Credit { role: string; name: string; }
                 (e.g. lower thirds / bumpers) */
 export type StudyBlock =
   | { kind: 'text'; body: string[] }
-  | { kind: 'image'; src: string; cap?: string }
-  | { kind: 'grid'; src: string[] }
+  | { kind: 'image'; src: string; cap?: string; ratio?: string }
+  | { kind: 'grid'; src: string[]; ratio?: string }
   | { kind: 'video'; src: string; cap?: string; controls?: boolean }
   | { kind: 'videogrid'; src: string[]; cap?: string };
 
@@ -148,7 +148,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'hulu-in-bloom',
-    title: 'In Bloom',
+    title: 'Hulu in Bloom',
     client: 'Hulu',
     year: '2024',
     role: 'VFX Supervision, Design & Animation',
@@ -166,8 +166,8 @@ export const projects: Project[] = [
       blocks: [
         { kind: 'video', src: '/media/hulu-in-bloom/case/hero.mp4', controls: true, cap: 'The hero film — muted by default; unmute to hear it.' },
         { kind: 'text', body: ['Behind the scenes on Stage 1 — the smaller infinity stage on the Disney lot.'] },
-        { kind: 'image', src: '/media/hulu-in-bloom/case/bts-05.jpg' },
-        { kind: 'grid', src: [
+        { kind: 'image', src: '/media/hulu-in-bloom/case/bts-05.jpg', ratio: '16 / 9' },
+        { kind: 'grid', ratio: '16 / 9', src: [
           '/media/hulu-in-bloom/case/bts-01.jpg',
           '/media/hulu-in-bloom/case/bts-02.jpg',
           '/media/hulu-in-bloom/case/bts-03.jpg',

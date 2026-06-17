@@ -330,16 +330,22 @@ function renderStudy(p: Project): string {
     switch (b.kind) {
       case 'text':
         return `<div class="case__text">${b.body.map((t) => `<p>${t}</p>`).join('')}</div>`;
-      case 'image':
-        return `<figure class="case__media"><img loading="lazy" src="${b.src}" alt="${p.title} — ${p.client}" />${b.cap ? `<figcaption class="case__cap caption">${b.cap}</figcaption>` : ''}</figure>`;
+      case 'image': {
+        const img = `<img loading="lazy" src="${b.src}" alt="${p.title} — ${p.client}" />`;
+        // ratio crops the still to a fixed aspect (e.g. 16/9) via cover.
+        const body = b.ratio ? `<div class="case__crop" style="aspect-ratio:${b.ratio}">${img}</div>` : img;
+        return `<figure class="case__media">${body}${b.cap ? `<figcaption class="case__cap caption">${b.cap}</figcaption>` : ''}</figure>`;
+      }
       case 'video': {
         // controls:true lets the viewer unmute / scrub; still autoplays muted + loops.
         const ctrl = b.controls ? ' controls' : '';
         const vid = `<video class="case__video" src="${b.src}" autoplay muted loop playsinline preload="metadata"${ctrl} aria-label="${p.title} — ${p.client}"></video>`;
         return `<figure class="case__media">${vid}${b.cap ? `<figcaption class="case__cap caption">${b.cap}</figcaption>` : ''}</figure>`;
       }
-      case 'grid':
-        return `<div class="case__grid">${b.src.map((src) => `<div class="case__cell"><img loading="lazy" src="${src}" alt="${p.title} detail" /></div>`).join('')}</div>`;
+      case 'grid': {
+        const cellStyle = b.ratio ? ` style="aspect-ratio:${b.ratio}"` : '';
+        return `<div class="case__grid">${b.src.map((src) => `<div class="case__cell"${cellStyle}><img loading="lazy" src="${src}" alt="${p.title} detail" /></div>`).join('')}</div>`;
+      }
       case 'videogrid': {
         const cells = b.src.map((src) => `<div class="case__vcell">${loopVideo(src, 'case__vcellvid', `${p.title} element`)}</div>`).join('');
         return `<figure class="case__media"><div class="case__vgrid">${cells}</div>${b.cap ? `<figcaption class="case__cap caption">${b.cap}</figcaption>` : ''}</figure>`;
