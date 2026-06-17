@@ -423,10 +423,8 @@ worklist.addEventListener('click', (e) => {
 modalClose.addEventListener('click', closeModal);
 window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) closeModal(); });
 
-/* ---- Studio + clients copy (single source: projects.ts) --------- */
+/* ---- Studio copy (single source: projects.ts) ------------------- */
 document.querySelector<HTMLElement>('[data-about]')!.textContent = site.about;
-document.querySelector<HTMLElement>('[data-clients]')!.innerHTML =
-  site.clients.split(' · ').map((c) => `<li>${c}</li>`).join('');
 
 /* ---- Pause the video once the hero scrolls away -----------------
    Saves GPU + battery: when the hero is off screen we stop drawing

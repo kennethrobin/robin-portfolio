@@ -218,7 +218,7 @@ body::after {
 .worklist { list-style: none; max-width: var(--max-width); margin-inline: auto; }
 .workrow {
   display: flex;
-  align-items: baseline;
+  align-items: center;           /* vertically centre title + meta between the rules */
   justify-content: space-between;
   gap: var(--sp-4);
   width: 100%;
@@ -340,7 +340,6 @@ body::after {
 .footer__mail:hover { opacity: 0.6; }
 .footer__support {
   margin-top: var(--sp-4);
-  max-width: 38ch;
   font-size: var(--fs-body);
   line-height: 1.4;
   color: rgba(255, 255, 255, 0.6);
@@ -384,6 +383,10 @@ body::after {
   border: 1px solid rgba(255, 255, 255, 0.22); /* faint gray outline */
   border-radius: 999px;                      /* rounded corners */
   font-size: var(--fs-caption);
+  text-align: center;
+  /* the .caption letter-spacing adds a trailing gap on the right; an equal
+     indent on the left keeps the label optically centred in the pill */
+  text-indent: 0.1em;
   transition: background 0.3s ease, border-color 0.3s ease;
 }
 .modal__close:hover { background: #16161b; border-color: rgba(255, 255, 255, 0.45); }
