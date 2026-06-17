@@ -242,7 +242,7 @@ export const projects: Project[] = [
     role: 'Direction, Design, Animation',
     blurb:
       'Title films for the 2015 AIGA Design Conference in New Orleans — my hometown. Through IAAH, I directed, designed and animated the main film and the speaker bumpers for a conference themed on the city’s revival.',
-    media: [],
+    media: ['/media/aiga-revival/case/thumb.png'],
     tone: '#160a10',
     study: {
       lead: '/media/aiga-revival/case/hero.mp4',
