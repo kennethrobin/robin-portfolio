@@ -230,9 +230,7 @@ export const projects: Project[] = [
       ],
       credits: [
         { role: 'Broadcast Design & Animation', name: 'Kenneth Robin' },
-        { role: 'Series Director', name: 'Rashidi Natara Harper' },
-        { role: 'Production', name: 'Lightbox' },
-        { role: 'Network', name: 'FX (Hulu)' },
+        { role: 'Client', name: 'FX Networks' },
       ],
     },
   },
