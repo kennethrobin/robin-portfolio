@@ -1,20 +1,19 @@
 /* ============================================================
    DIRECTION D — "Rōbin"
 
-   A fullscreen WebGL screen plays random ~3s clips drawn from
-   ALL of Kenneth's films, hard-cutting with a glitch pulse so a
-   visitor sees as much work as possible in the first seconds.
+   A fullscreen WebGL screen plays Kenneth's films back-to-back in a
+   shuffled order, hard-cutting from one clip to the next so a visitor
+   sees as much work as possible in the first seconds.
 
    How the cuts work
    -----------------
-   Every film is its own <video> element (muted, preloaded).
-   Two of them are "live" at any moment: the one on screen and
-   the next one, already seeked to a random in-point and playing
-   silently underneath. On the cut, a shader blends them with a
-   sliced RGB-split glitch. Different random in-points every
-   time — no two visits look the same.
+   Every film is its own <video> element (muted, preloaded). Two are
+   "live" at any moment: the one on screen and the next one, which we
+   start playing off-screen a beat before the cut so the hard cut always
+   lands on a clip that's already moving. Only two elements ever load, so
+   we never download every clip at once.
 
-   Tweakables live in CLIP and the SOURCES list below.
+   Tweakables live in CLIP below.
    ============================================================ */
 import './d.css';
 import * as THREE from 'three';
@@ -24,36 +23,18 @@ import { heroClips } from '../data/clips';
 import { initWordmark } from '../shared/wordmark';
 
 /* ---- The reel ------------------------------------------------
-   A shuffled playlist of full clips (no 3-second sampling). Each clip
-   plays start-to-end, then dissolves to the next; at the end of the
-   list it loops back to the first clip played. Only two video elements
-   ever load (the one on screen + the one preloading), so we never
-   download all the clips at once.                                  */
+   A shuffled playlist of full clips. Each clip plays start-to-end, then
+   HARD-CUTS to the next; at the end of the list it loops back to the
+   first clip played. Only two video elements ever load (the one on
+   screen + the one preloading), so we never download every clip at once.
+
+   `warm` is how many seconds before a clip ends we start the next clip
+   playing off-screen, so the hard cut always lands on a clip that's
+   already moving — never a frozen first frame.                       */
 const CLIP = {
   grain: 0.05,  // constant film grain (0 = clean)
+  warm: 0.25,   // seconds the incoming clip pre-rolls before the cut
 };
-
-/* ---- Reel transitions ---------------------------------------------
-   The cut between clips is a random pick of these three (see the shader
-   for how each is drawn). `dur` is seconds, `ease` is a GSAP ease. */
-const MODES = [
-  { name: 'Luma',   dur: 0.85, ease: 'power1.inOut' },  // 0 filmic luminance reveal
-  { name: 'Glitch', dur: 0.45, ease: 'power2.inOut' },  // 1 sliced RGB-split
-  { name: 'Hard',   dur: 0.05, ease: 'none' },          // 2 instant hard cut
-];
-
-// The next transition is decided AHEAD of each cut, so we can start it
-// early enough that the outgoing clip is still playing through the blend
-// (no freeze-frame pause). lastMode avoids two of the same in a row.
-let lastMode = -1;
-let nextMode = 0;
-function pickNextMode() {
-  let m = Math.floor(Math.random() * MODES.length);
-  if (m === lastMode) m = (m + 1) % MODES.length;
-  lastMode = m;
-  nextMode = m;
-}
-pickNextMode();
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -107,14 +88,9 @@ const scene = new THREE.Scene();
 const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
 const uniforms = {
-  uFrom: { value: cur.tex },
-  uTo: { value: cur.tex },
-  uAspectFrom: { value: 16 / 9 },
-  uAspectTo: { value: 16 / 9 },
+  uTex: { value: cur.tex },        // the clip currently on screen
+  uAspect: { value: 16 / 9 },      // its native aspect ratio
   uScreen: { value: innerWidth / innerHeight },
-  uProgress: { value: 0 },                       // 0..1 across a transition
-  uMode: { value: 0 },                           // which MODES style is playing
-  uSeed: { value: 1 },
   uTime: { value: 0 },
   uGrain: { value: CLIP.grain },
 };
@@ -129,26 +105,11 @@ const screenMat = new THREE.ShaderMaterial({
     }
   `,
   fragmentShader: /* glsl */ `
-    uniform sampler2D uFrom, uTo;
-    uniform float uAspectFrom, uAspectTo, uScreen;
-    uniform float uProgress, uMode, uSeed, uTime, uGrain;
+    uniform sampler2D uTex;
+    uniform float uAspect, uScreen, uTime, uGrain;
     varying vec2 vUv;
 
     float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-
-    // smooth value noise + fbm — used by the luma transition
-    float vnoise(vec2 p) {
-      vec2 i = floor(p), f = fract(p);
-      float a = hash(i), b = hash(i + vec2(1.0, 0.0));
-      float c = hash(i + vec2(0.0, 1.0)), d = hash(i + vec2(1.0, 1.0));
-      vec2 u = f * f * (3.0 - 2.0 * f);
-      return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
-    }
-    float fbm(vec2 p) {
-      float v = 0.0, a = 0.5;
-      for (int i = 0; i < 4; i++) { v += a * vnoise(p); p *= 2.0; a *= 0.5; }
-      return v;
-    }
 
     // CSS object-fit: cover, in shader form
     vec2 coverUV(vec2 uv, float texAspect, float screenAspect) {
@@ -157,45 +118,11 @@ const screenMat = new THREE.ShaderMaterial({
       else d.x *= screenAspect / texAspect;
       return d + 0.5;
     }
-    vec3 sFrom(vec2 uv) { return texture2D(uFrom, coverUV(uv, uAspectFrom, uScreen)).rgb; }
-    vec3 sTo(vec2 uv)   { return texture2D(uTo,   coverUV(uv, uAspectTo,   uScreen)).rgb; }
 
     void main() {
-      vec2 uv = vUv;
-      float p = uProgress;
-      int mode = int(uMode + 0.5);
-      vec3 col;
-
-      if (mode == 0) {
-        // LUMA — incoming reveals through a brightness + grain threshold
-        float n = fbm(uv * 4.0 + uSeed);
-        float lum = dot(sFrom(uv), vec3(0.299, 0.587, 0.114));
-        float key = lum * 0.6 + n * 0.4;
-        float th = mix(-0.15, 1.15, p);
-        float m = smoothstep(th - 0.12, th + 0.12, key);   // 1 = from, 0 = to
-        col = mix(sTo(uv), sFrom(uv), m);
-
-      } else if (mode == 1) {
-        // GLITCH — sliced horizontal tear + RGB split, strongest mid-cut
-        float g = sin(p * 3.14159);
-        float slice = floor(uv.y * 18.0);
-        float n = hash(vec2(slice, uSeed));
-        vec2 uvg = uv;
-        uvg.x += (n - 0.5) * 0.18 * g;
-        float m = clamp(p + (n - 0.5) * 0.7 * g, 0.0, 1.0);
-        float off = 0.012 * g;
-        col.r = mix(sFrom(uvg + vec2(off, 0.0)).r, sTo(uvg + vec2(off, 0.0)).r, m);
-        col.g = mix(sFrom(uvg).g,                   sTo(uvg).g,                   m);
-        col.b = mix(sFrom(uvg - vec2(off, 0.0)).b, sTo(uvg - vec2(off, 0.0)).b, m);
-
-      } else {
-        // HARD — instant cut
-        col = mix(sFrom(uv), sTo(uv), step(0.5, p));
-      }
-
+      vec3 col = texture2D(uTex, coverUV(vUv, uAspect, uScreen)).rgb;
       // constant film grain
       col += (hash(vUv * vec2(1920.0, 1080.0) + fract(uTime) * 60.0) - 0.5) * uGrain;
-
       gl_FragColor = vec4(col, 1.0);
     }
   `,
@@ -219,11 +146,12 @@ let heroVisible = true;
 gsap.ticker.add(() => {
   if (!heroVisible) return;
   uniforms.uTime.value = performance.now() / 1000;
+  maybeScheduleCut();
   renderer.render(scene, camera);
 });
 
 /* ---- Playback ---------------------------------------------------
-   Play each clip start-to-end, then dissolve to the preloaded next.
+   Play each clip start-to-end, then hard-cut to the preloaded next.
    At the end of the shuffled list it loops back to the first clip.  */
 const taphint = document.querySelector<HTMLElement>('[data-taphint]')!;
 let unlocked = false;
@@ -243,8 +171,9 @@ window.addEventListener('pointerdown', unlockPlayback);
 window.addEventListener('touchstart', unlockPlayback, { passive: true });
 
 /** Resolve once the video has actually painted a fresh frame, so the
-    incoming clip is never blended in as a frozen first frame. Falls back
-    to a short timeout if rVFC is unavailable or playback is blocked. */
+    incoming clip is already moving the instant we cut to it (never a
+    frozen first frame). Falls back to a short timeout if rVFC is
+    unavailable or playback is blocked. */
 function firstFrame(el: HTMLVideoElement, timeout = 200): Promise<void> {
   return new Promise((resolve) => {
     let done = false;
@@ -256,86 +185,64 @@ function firstFrame(el: HTMLVideoElement, timeout = 200): Promise<void> {
   });
 }
 
-/** Clip-end safety net: if the frame-accurate scheduler ever misses the
-    cut (e.g. a backgrounded tab throttled the ticker), cut as soon as the
-    clip ends so the reel never stalls on a finished video. */
+/** Clip-end safety net: if the scheduler ever misses the cut (e.g. a
+    backgrounded tab throttled the ticker), cut as soon as the clip ends
+    so the reel never stalls on a finished video. */
 function onEnded() {
   if (!transitioning) advance();
 }
 
-/** Frame-accurate scheduler (run every render frame): begin the cut a
-    little BEFORE the current clip ends so the outgoing clip is still
-    playing through the blend — no freeze-frame pause. The next mode is
-    chosen ahead of time so we know how long its blend lasts. */
+/** Run every render frame: a hair BEFORE the current clip ends, kick off
+    the cut so we can warm the next clip and hard-cut while the outgoing
+    one is still moving (no freeze on either side). */
 function maybeScheduleCut() {
   if (reducedMotion || transitioning || cutScheduled) return;
   const el = cur.el;
   const d = el.duration;
   if (el.paused || !isFinite(d) || d <= 0) return;
-  const lead = Math.min(MODES[nextMode].dur + 0.15, d * 0.5);
+  const lead = Math.min(CLIP.warm, d * 0.5);
   if (el.currentTime >= d - lead) {
     cutScheduled = true;
     advance();
   }
 }
 
-/** Run a transition to the preloaded next clip, then promote it.
+/** Hard-cut to the preloaded next clip, then promote it.
     Triggered by the scheduler above (or the ended safety net). */
 async function advance() {
   if (transitioning) return;
   transitioning = true;
   cutScheduled = true;
 
-  const mode = nextMode;                 // decided ahead of the cut
-  uniforms.uMode.value = mode;
-  uniforms.uSeed.value = Math.random() * 100;
-
-  // Bring the incoming clip up to speed and wait for a real decoded frame
-  // BEFORE the blend starts, so it never flashes a frozen first frame.
-  uniforms.uTo.value = nxt.tex;
-  uniforms.uAspectTo.value = aspectOf(nxt);
+  // Warm the incoming clip up (playing + one real decoded frame) while the
+  // outgoing clip is still on screen, so the cut lands on a moving frame.
   nxt.el.currentTime = 0;
   await nxt.el.play().catch(() => {});
   await firstFrame(nxt.el);
 
-  // Keep the blend no longer than the time the OUTGOING clip still has to
-  // play (measured now, after the play()/frame wait). Otherwise a short
-  // clip ends mid-blend and freezes on its last frame — the slight pause.
-  const remaining = (isFinite(cur.el.duration) ? cur.el.duration : Infinity) - cur.el.currentTime;
-  const blendDur = Math.min(MODES[mode].dur, Math.max(remaining - 0.08, 0.05));
-
-  uniforms.uProgress.value = 0;
-  await new Promise<void>((res) => {
-    gsap.to(uniforms.uProgress, {
-      value: 1, duration: blendDur, ease: MODES[mode].ease, onComplete: () => res(),
-    });
-  });
+  // the cut: swap the visible texture in a single frame
+  uniforms.uTex.value = nxt.tex;
+  uniforms.uAspect.value = aspectOf(nxt);
 
   // promote nxt -> cur; the old slot is freed to preload the next clip
   cur.el.removeEventListener('ended', onEnded);
   cur.el.pause();
   [cur, nxt] = [nxt, cur];
-  uniforms.uFrom.value = cur.tex;
-  uniforms.uAspectFrom.value = aspectOf(cur);
-  uniforms.uTo.value = cur.tex;
-  uniforms.uProgress.value = 0;
-  cur.el.addEventListener('ended', onEnded);
   pos = nextPos();
+  cur.el.addEventListener('ended', onEnded);
   transitioning = false;
   cutScheduled = false;
-  pickNextMode();                        // choose the next blend (sets its lead time)
 
   loadInto(nxt, playlist[nextPos()]);   // queue the clip after this one
 }
 
 async function startReel() {
   await loadInto(cur, playlist[pos]);
-  uniforms.uFrom.value = cur.tex;
-  uniforms.uTo.value = cur.tex;
-  uniforms.uAspectFrom.value = uniforms.uAspectTo.value = aspectOf(cur);
+  uniforms.uTex.value = cur.tex;
+  uniforms.uAspect.value = aspectOf(cur);
 
   if (reducedMotion) {
-    // calm fallback: hold one still frame, no playback or transitions
+    // calm fallback: hold one still frame, no playback or cuts
     cur.el.currentTime = Math.min(1.2, (cur.el.duration || 2) * 0.3);
     return;
   }
