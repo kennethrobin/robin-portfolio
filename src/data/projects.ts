@@ -389,5 +389,5 @@ export const site = {
   // Names only — keep this ruthlessly true. Add a name only once it's confirmed.
   clients: 'BMW · BBC · Al Jazeera · Xbox · Squarespace · AT&T · Hulu · Faraday · M83 · FootJoy · Dodge · Samsung · AIGA',
   about:
-    'Kenneth Robin is a creative director and motion designer based in Los Angeles, working across film, broadcast design, 3D, and large-scale experiences. I bring a strong point of view and the craft to back it — concepting ambitious work and, when it doesn’t exist yet, inventing the technique to make it real. For over a decade I’ve made that work for global brands and artists who’d rather do something singular than something safe.',
+    'I am a designer based in Los Angeles, working across film, broadcast design, 3D, and large-scale experiences for over 15 years. I bring a strong point of view and the craft to back it — concepting ambitious work and, when it doesn’t exist yet, inventing the technique to make it real.',
 };
