@@ -321,6 +321,7 @@ const modal = document.querySelector<HTMLDivElement>('[data-modal]')!;
 const modalInner = modal.querySelector<HTMLDivElement>('.modal__inner')!;
 const modalClose = modal.querySelector<HTMLButtonElement>('[data-modal-close]')!;
 let lastFocus: HTMLElement | null = null;
+let labsResize: (() => void) | null = null;   // re-layout handler, live while Labs is open
 
 /* Looping, muted, inline local video (used by case-study lead + blocks). */
 const loopVideo = (src: string, cls: string, label: string): string =>
@@ -411,31 +412,39 @@ function closeModal() {
   modal.hidden = true;
   modalInner.innerHTML = '';       // stops any playing iframe
   document.body.style.overflow = '';
+  if (labsResize) { window.removeEventListener('resize', labsResize); labsResize = null; }
   gsap.to(preview, { opacity: 0, duration: 0.2 });
   shownIdx = -1;
   lastFocus?.focus();
 }
 
-/* ---- Labs — experimental work, opened from the nav as a masonry
-   gallery in the same modal. .mp4 entries loop muted; everything
-   else (jpg/png/webp/gif) renders as an image. */
+/* ---- Labs — experimental work, opened from the nav as a justified,
+   no-crop masonry. .mp4 entries loop muted; everything else renders as
+   an image, both keeping their natural aspect ratio. */
 
-/** Natural pixel area of a media item, used to match media to slot size.
-    Videos are full-res renders so they get a sensible default; failed /
-    missing loads fall back to 0 so they land in the smallest slots. */
-function mediaArea(src: string): Promise<number> {
-  if (/\.mp4$/i.test(src)) return Promise.resolve(1920 * 1080);
+/** Natural dimensions of a media item, so we can lay it out without
+    cropping. Images and videos are both measured; a failed / missing
+    load falls back to 16:9 so the row maths still works. */
+function mediaSize(src: string): Promise<{ w: number; h: number }> {
   return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => resolve(img.naturalWidth * img.naturalHeight);
-    img.onerror = () => resolve(0);
-    img.src = src;
+    if (/\.mp4$/i.test(src)) {
+      const v = document.createElement('video');
+      v.preload = 'metadata';
+      v.onloadedmetadata = () => resolve({ w: v.videoWidth || 16, h: v.videoHeight || 9 });
+      v.onerror = () => resolve({ w: 16, h: 9 });
+      v.src = src;
+    } else {
+      const img = new Image();
+      img.onload = () => resolve({ w: img.naturalWidth || 16, h: img.naturalHeight || 9 });
+      img.onerror = () => resolve({ w: 16, h: 9 });
+      img.src = src;
+    }
   });
 }
 
 async function openLabs() {
   // Show the shell immediately so the open feels instant; the grid fills
-  // in a beat later, once we've measured each item (see below).
+  // in a beat later, once we've measured every item (see below).
   modalInner.innerHTML = `
     <h2 class="modal__title">${labs.title}</h2>
     <div class="case__intro"><p>${labs.blurb}</p></div>
@@ -448,38 +457,62 @@ async function openLabs() {
   gsap.fromTo(modal, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power2.out' });
   gsap.fromTo(modalInner, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'expo.out', delay: 0.05 });
 
-  // Repeating rhythm across the grid: 2 across, then 3 across, then 1 big
-  // full-width feature (6-item cycle). To avoid a low-res image looking
-  // grainy when it's blown up into a big slot, we measure every item and
-  // hand the highest-resolution media to the largest slots — then shuffle
-  // within each size tier so which piece lands where still varies per open.
+  // Fresh shuffle each open, then measure every item so we can build a
+  // justified (Flickr-style) masonry: items keep their natural shape
+  // — vertical / square art is never cropped — yet each row fills the
+  // full width and shares one height, so there are no big gaps on the
+  // sides or underneath.
   const sized = await Promise.all(
-    shuffle(labs.items).map(async (src) => ({ src, area: await mediaArea(src) })),
+    shuffle(labs.items).map(async (src) => ({ src, ...(await mediaSize(src)) })),
   );
   const grid = modalInner.querySelector<HTMLElement>('[data-labs-grid]');
   if (!grid) return;   // modal was closed before measuring finished
 
-  // 2 = full (biggest), 1 = half, 0 = third (smallest), by grid position.
-  const rankAt = (i: number) => (i % 6 < 2 ? 1 : i % 6 < 5 ? 0 : 2);
-  const positions = sized.map((_, i) => i);
-  const nFull = positions.filter((i) => rankAt(i) === 2).length;
-  const nHalf = positions.filter((i) => rankAt(i) === 1).length;
-  const byArea = [...sized].sort((a, b) => b.area - a.area);
-  const pools: Record<number, { src: string }[]> = {
-    2: shuffle(byArea.slice(0, nFull)),
-    1: shuffle(byArea.slice(nFull, nFull + nHalf)),
-    0: shuffle(byArea.slice(nFull + nHalf)),
-  };
-
-  grid.innerHTML = positions.map((i) => {
-    const { src } = pools[rankAt(i)].pop()!;
-    const media = /\.mp4$/i.test(src)
+  const cell = (src: string) =>
+    /\.mp4$/i.test(src)
       ? `<video class="labs__media" src="${src}" autoplay muted loop playsinline preload="metadata"></video>`
       : `<img class="labs__media" loading="lazy" src="${src}" alt="Labs experiment" />`;
-    const m = i % 6;
-    const cls = m < 2 ? 'labs__item--half' : m < 5 ? 'labs__item--third' : 'labs__item--full';
-    return `<div class="labs__item ${cls}">${media}</div>`;
-  }).join('');
+
+  // Group items into rows by aspect ratio. A row of items whose aspect
+  // ratios sum to S renders at height ≈ containerWidth / S, so we close a
+  // row once that sum reaches containerWidth / targetHeight. Widths are
+  // then ratio-driven in CSS (flex-grow = aspect ratio), which keeps rows
+  // gap-free at any width; we only re-group on resize to keep heights in
+  // a pleasant band.
+  const relayout = () => {
+    const containerW = grid.clientWidth || 1100;
+    const targetH = Math.max(200, Math.min(340, containerW / 3.2));
+    const targetSum = containerW / targetH;
+    const rows: { src: string; ar: number }[][] = [];
+    let row: { src: string; ar: number }[] = [];
+    let sum = 0;
+    for (const it of sized) {
+      const ar = it.w / it.h;
+      row.push({ src: it.src, ar });
+      sum += ar;
+      if (sum >= targetSum) { rows.push(row); row = []; sum = 0; }
+    }
+    const trailing = row.length > 0;   // last row never reached a full width
+    if (trailing) rows.push(row);
+
+    grid.innerHTML = rows.map((r, ri) => {
+      // The trailing partial row is left-aligned at the target height
+      // instead of stretching, so a lone image doesn't balloon.
+      const partial = trailing && ri === rows.length - 1;
+      const cells = r.map(({ src, ar }) =>
+        partial
+          ? `<div class="labs__item" style="flex:0 0 auto;width:${(targetH * ar).toFixed(2)}px">${cell(src)}</div>`
+          : `<div class="labs__item" style="flex-grow:${ar.toFixed(4)}">${cell(src)}</div>`,
+      ).join('');
+      return `<div class="labs__row">${cells}</div>`;
+    }).join('');
+  };
+
+  relayout();
+  // Re-group on resize (debounced) so row counts track the width.
+  let t = 0;
+  labsResize = () => { clearTimeout(t); t = window.setTimeout(relayout, 150); };
+  window.addEventListener('resize', labsResize);
 }
 
 worklist.addEventListener('click', (e) => {

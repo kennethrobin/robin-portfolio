@@ -532,26 +532,27 @@ body::after {
   .case__vgrid { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* ---- Labs gallery — repeating 2 / 3 / 1-big rhythm ----------
-   6-col grid: two half-width tiles (span 3), then three third-width
-   tiles (span 2), then one full-width feature — looped. Cells share
-   an aspect ratio so each row lines up; media covers the cell. */
+/* ---- Labs gallery — justified, no-crop masonry --------------
+   Items keep their natural aspect ratio (vertical / square art is
+   never cropped). JS groups items into rows; within a row each item's
+   flex-grow is set to its aspect ratio, so widths add up to the full
+   container width and every item in the row shares one height — no big
+   gaps on the sides or underneath. */
 .labs__grid {
   margin-top: clamp(40px, 7vh, 80px);
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: var(--grid-gap);
 }
-.labs__item { overflow: hidden; background: #0a0a0c; }
-.labs__item--half  { grid-column: span 3; aspect-ratio: 4 / 3; }
-.labs__item--third { grid-column: span 2; aspect-ratio: 4 / 3; }
-.labs__item--full  { grid-column: 1 / -1; aspect-ratio: 16 / 9; }
-.labs__media { width: 100%; height: 100%; object-fit: cover; display: block; background: #0a0a0c; }
-@media (max-width: 640px) {
-  .labs__item--half { grid-column: 1 / -1; }   /* 1 across */
-  .labs__item--third { grid-column: span 3; }  /* 2 across */
-  .labs__item--full { grid-column: 1 / -1; }
+.labs__row { display: flex; gap: var(--grid-gap); }
+.labs__item {
+  flex-basis: 0;        /* flex-grow (= aspect ratio) is set inline */
+  min-width: 0;
+  overflow: hidden;
+  background: #0a0a0c;
+  line-height: 0;
 }
+.labs__media { width: 100%; height: auto; display: block; background: #0a0a0c; }
 
 /* ---- Scroll reveal --------------------------------------------
    The hidden state is gated behind .reveal-on (added by JS), so if
