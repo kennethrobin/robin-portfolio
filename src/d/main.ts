@@ -419,22 +419,27 @@ function closeModal() {
 /* ---- Labs — experimental work, opened from the nav as a masonry
    gallery in the same modal. .mp4 entries loop muted; everything
    else (jpg/png/webp/gif) renders as an image. */
-function openLabs() {
-  // a fresh shuffle of everything on each open — it's a dump, order is random.
-  // Repeating rhythm across the grid: 2 across, then 3 across, then 1 big
-  // full-width feature (6-item cycle).
-  const items = shuffle(labs.items).map((src, i) => {
-    const media = /\.mp4$/i.test(src)
-      ? `<video class="labs__media" src="${src}" autoplay muted loop playsinline preload="metadata"></video>`
-      : `<img class="labs__media" loading="lazy" src="${src}" alt="Labs experiment" />`;
-    const m = i % 6;
-    const cls = m < 2 ? 'labs__item--half' : m < 5 ? 'labs__item--third' : 'labs__item--full';
-    return `<div class="labs__item ${cls}">${media}</div>`;
-  }).join('');
+
+/** Natural pixel area of a media item, used to match media to slot size.
+    Videos are full-res renders so they get a sensible default; failed /
+    missing loads fall back to 0 so they land in the smallest slots. */
+function mediaArea(src: string): Promise<number> {
+  if (/\.mp4$/i.test(src)) return Promise.resolve(1920 * 1080);
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img.naturalWidth * img.naturalHeight);
+    img.onerror = () => resolve(0);
+    img.src = src;
+  });
+}
+
+async function openLabs() {
+  // Show the shell immediately so the open feels instant; the grid fills
+  // in a beat later, once we've measured each item (see below).
   modalInner.innerHTML = `
     <h2 class="modal__title">${labs.title}</h2>
     <div class="case__intro"><p>${labs.blurb}</p></div>
-    <div class="labs__grid">${items}</div>`;
+    <div class="labs__grid" data-labs-grid></div>`;
   modal.hidden = false;
   modal.scrollTop = 0;
   document.body.style.overflow = 'hidden';
@@ -442,6 +447,39 @@ function openLabs() {
   modalClose.focus();
   gsap.fromTo(modal, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power2.out' });
   gsap.fromTo(modalInner, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'expo.out', delay: 0.05 });
+
+  // Repeating rhythm across the grid: 2 across, then 3 across, then 1 big
+  // full-width feature (6-item cycle). To avoid a low-res image looking
+  // grainy when it's blown up into a big slot, we measure every item and
+  // hand the highest-resolution media to the largest slots — then shuffle
+  // within each size tier so which piece lands where still varies per open.
+  const sized = await Promise.all(
+    shuffle(labs.items).map(async (src) => ({ src, area: await mediaArea(src) })),
+  );
+  const grid = modalInner.querySelector<HTMLElement>('[data-labs-grid]');
+  if (!grid) return;   // modal was closed before measuring finished
+
+  // 2 = full (biggest), 1 = half, 0 = third (smallest), by grid position.
+  const rankAt = (i: number) => (i % 6 < 2 ? 1 : i % 6 < 5 ? 0 : 2);
+  const positions = sized.map((_, i) => i);
+  const nFull = positions.filter((i) => rankAt(i) === 2).length;
+  const nHalf = positions.filter((i) => rankAt(i) === 1).length;
+  const byArea = [...sized].sort((a, b) => b.area - a.area);
+  const pools: Record<number, { src: string }[]> = {
+    2: shuffle(byArea.slice(0, nFull)),
+    1: shuffle(byArea.slice(nFull, nFull + nHalf)),
+    0: shuffle(byArea.slice(nFull + nHalf)),
+  };
+
+  grid.innerHTML = positions.map((i) => {
+    const { src } = pools[rankAt(i)].pop()!;
+    const media = /\.mp4$/i.test(src)
+      ? `<video class="labs__media" src="${src}" autoplay muted loop playsinline preload="metadata"></video>`
+      : `<img class="labs__media" loading="lazy" src="${src}" alt="Labs experiment" />`;
+    const m = i % 6;
+    const cls = m < 2 ? 'labs__item--half' : m < 5 ? 'labs__item--third' : 'labs__item--full';
+    return `<div class="labs__item ${cls}">${media}</div>`;
+  }).join('');
 }
 
 worklist.addEventListener('click', (e) => {
