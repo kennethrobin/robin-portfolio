@@ -336,8 +336,13 @@ function renderStudy(p: Project): string {
   const credits = s.credits
     .map((c) => `<div class="case__credit"><dt>${c.role}</dt><dd>${c.name}</dd></div>`)
     .join('');
+  // Lead film: a remote embed (Vimeo) plays in an iframe; a local
+  // file plays as a muted, looping inline video.
+  const lead = /^https?:/.test(s.lead)
+    ? `<iframe class="case__lead case__lead--embed" src="${s.lead}?autoplay=1&muted=1&loop=1&title=0&byline=0" allow="autoplay; fullscreen" title="${p.title} — ${p.client}"></iframe>`
+    : loopVideo(s.lead, 'case__lead', `${p.title} — ${p.client}`);
   return `
-    ${loopVideo(s.lead, 'case__lead', `${p.title} — ${p.client}`)}
+    ${lead}
     <div class="modal__meta caption"><span>${p.client}</span><span>${p.year}</span><span>${p.role}</span></div>
     <h2 class="modal__title">${p.title}</h2>
     <div class="case__intro">${intro}</div>

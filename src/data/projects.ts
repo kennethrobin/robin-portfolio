@@ -114,7 +114,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'bbc-two',
-    title: 'Two — Visceral',
+    title: 'BBC Two Rebrand',
     client: 'BBC',
     year: '2020',
     role: 'Design, Animation',
@@ -123,6 +123,19 @@ export const projects: Project[] = [
     media: m('bbc-two', 1),
     video: 'https://player.vimeo.com/video/480136521',
     tone: '#1a0a12',
+    study: {
+      lead: 'https://player.vimeo.com/video/480136521',
+      intro: [
+        'The BBC Two “2” has always been a playground for designers — a mark made to be reimagined as an object, a creature, a material. For this rebrand concept I wanted to treat the numeral as something alive and visceral: a form that breathes, tenses and reacts, built from a material that feels organic rather than graphic.',
+        'I developed the idea through a run of material and motion studies — exploring surface, translucency and the way light moves across and through the “2” as it shifts. The aim was an ident that reads less like a logo animation and more like a living thing caught on screen for a few seconds.',
+        'Everything was designed, modeled and animated to hold up at broadcast scale, where the mark has to land with presence in just a beat or two — distinct, tactile, and unmistakably Two.',
+      ],
+      blocks: [],
+      credits: [
+        { role: 'Concept, Design & Animation', name: 'Kenneth Robin' },
+        { role: 'Brand', name: 'BBC Two' },
+      ],
+    },
   },
   {
     slug: 'cybrpnk',

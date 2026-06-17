@@ -427,6 +427,9 @@ body::after {
   margin-bottom: var(--sp-5);
   background: #000;
 }
+/* Vimeo / embed lead needs an explicit ratio (an iframe has no
+   intrinsic height like a <video> does). */
+.case__lead--embed { aspect-ratio: 16 / 9; border: 0; }
 /* Long-form intro — a touch larger than a blurb, generous measure. */
 .case__intro {
   max-width: 66ch;
