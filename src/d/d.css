@@ -532,18 +532,22 @@ body::after {
   .case__vgrid { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* ---- Labs gallery (mixed images + loops) ---------------------
-   Row-major grid so order is predictable: item 3 = top-right,
-   item 4 = start of row 2, etc. Items keep their aspect ratio. */
+/* ---- Labs gallery — 2-col gap-free masonry -------------------
+   grid-auto-rows is a fine unit; JS (sizeLabsItem) sets each tile's
+   row span from its media aspect ratio so the columns pack tightly
+   with no gaps. Wide/landscape items span both columns for rhythm. */
 .labs__grid {
   margin-top: clamp(40px, 7vh, 80px);
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: 8px;
+  grid-auto-flow: row dense;
   gap: var(--grid-gap);
-  align-items: start;
 }
-.labs__media { width: 100%; height: auto; display: block; background: #0a0a0c; }
-@media (max-width: 640px) { .labs__grid { grid-template-columns: repeat(2, 1fr); } }
+.labs__item { overflow: hidden; grid-row: span 24; }   /* span 24 = pre-load placeholder */
+.labs__item--wide { grid-column: 1 / -1; }
+.labs__media { width: 100%; height: 100%; object-fit: cover; display: block; background: #0a0a0c; }
+@media (max-width: 560px) { .labs__grid { grid-template-columns: 1fr; } }
 
 /* ---- Scroll reveal --------------------------------------------
    The hidden state is gated behind .reveal-on (added by JS), so if

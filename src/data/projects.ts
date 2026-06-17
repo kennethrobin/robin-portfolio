@@ -394,9 +394,10 @@ export const site = {
 
 /* ---- Labs — experimental / self-initiated work --------------
    Opened from the top nav as a modal (like a project page). A
-   masonry gallery of mixed media; .mp4 entries play as muted
-   loops, everything else renders as an image. Add/remove paths
-   in public/media/labs/ here to refine the dump. */
+   2-column gap-free masonry of mixed media; .mp4 entries play as
+   muted loops, everything else renders as an image. Wide/landscape
+   items auto-span the full width. The first four are pinned; the
+   rest shuffle on each open. Add/remove paths in public/media/labs/. */
 export const labs = {
   title: 'Labs',
   blurb:
@@ -431,5 +432,6 @@ export const labs = {
     '/media/labs/labs-26.gif',
     '/media/labs/labs-27.gif',
     '/media/labs/labs-29.webp',
+    '/media/labs/labs-30.mp4',
   ],
 };
