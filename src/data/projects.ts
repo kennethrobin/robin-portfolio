@@ -367,7 +367,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'squarespace',
-    title: 'Hip Hop Bumper',
+    title: 'Squarespace Bumper',
     client: 'Squarespace',
     year: '2014',
     role: 'Design, Animation',
@@ -380,7 +380,6 @@ export const projects: Project[] = [
       lead: 'https://player.vimeo.com/video/154650574',
       intro: [
         'A short bumper I designed and animated for Squarespace — a quick, high-energy open with a hip hop pulse.',
-        'Nothing precious: bold type, tight timing and a few clean moves, built to grab attention in a couple of seconds and hand off to whatever comes next.',
       ],
       blocks: [],
       credits: [
