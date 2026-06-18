@@ -168,7 +168,7 @@ export const projects: Project[] = [
         'It was shot on Stage 1 — the smaller infinity stage on the Disney lot — which gave us a clean, fully controllable environment to build the world around the talent. A genuinely fun collaboration, and a meaningful one to be part of.',
       ],
       blocks: [
-        { kind: 'video', src: '/media/hulu-in-bloom/case/hero.mp4', controls: true, cap: 'The hero film — muted by default; unmute to hear it.' },
+        { kind: 'video', src: '/media/hulu-in-bloom/case/hero.mp4', controls: true, cap: 'The hero film.' },
         { kind: 'text', body: ['Behind the scenes on Stage 1 — the smaller infinity stage on the Disney lot.'] },
         { kind: 'image', src: '/media/hulu-in-bloom/case/bts-05.jpg', ratio: '16 / 9' },
         { kind: 'grid', ratio: '16 / 9', src: [
@@ -211,7 +211,7 @@ export const projects: Project[] = [
         'The package threaded the series’ three layers — the people, the music, and the America around them — into a single visual voice that ran across every episode on FX and Hulu.',
       ],
       blocks: [
-        { kind: 'video', src: '/media/hip-hop-uncovered/case/reel.mp4', controls: true, cap: 'Highlight reel — muted by default; unmute to hear it.' },
+        { kind: 'video', src: '/media/hip-hop-uncovered/case/reel.mp4', controls: true, cap: 'Highlight reel.' },
         { kind: 'image', src: '/media/hip-hop-uncovered/case/still-hero.webp', ratio: '16 / 9' },
         { kind: 'grid', ratio: '16 / 9', src: [
           '/media/hip-hop-uncovered/case/still-01.webp',
@@ -265,7 +265,7 @@ export const projects: Project[] = [
           '/media/aiga-revival/case/bumper-09.mp4',
           '/media/aiga-revival/case/bumper-10.mp4',
         ] },
-        { kind: 'video', src: '/media/aiga-revival/case/trombone.mp4', controls: true, cap: 'Trombone interlude — muted by default; unmute to hear it.' },
+        { kind: 'video', src: '/media/aiga-revival/case/trombone.mp4', controls: true, cap: 'Trombone interlude.' },
         { kind: 'video', src: '/media/aiga-revival/case/credits.mp4', controls: true, cap: 'Closing credit roll.' },
       ],
       credits: [
