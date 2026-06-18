@@ -389,7 +389,7 @@ export const site = {
   // Names only — keep this ruthlessly true. Add a name only once it's confirmed.
   clients: 'BMW · BBC · Al Jazeera · Xbox · Squarespace · AT&T · Hulu · Faraday · M83 · FootJoy · Dodge · Samsung · AIGA',
   about:
-    'I’m Kenneth, a designer and director in LA. I’ve spent about fifteen years making things move — mostly motion and 3D, with the occasional piece big enough to walk right up to. The part I love is when a rough idea finally clicks; I’ll happily lose a weekend chasing that. I care a lot about the work, but I don’t take myself too seriously, and I’m an easy person to make things with. If you’ve got something you’re trying to figure out, let’s talk.',
+    'I’m Kenneth, a designer and director in LA. About fifteen years making things move, mostly motion and 3D. I like chasing an idea until it clicks. If you’re working on something, let’s talk.',
 };
 
 /* ---- Labs — experimental / self-initiated work --------------
