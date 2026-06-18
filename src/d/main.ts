@@ -322,10 +322,14 @@ const modalInner = modal.querySelector<HTMLDivElement>('.modal__inner')!;
 const modalClose = modal.querySelector<HTMLButtonElement>('[data-modal-close]')!;
 let lastFocus: HTMLElement | null = null;
 let labsResize: (() => void) | null = null;   // re-layout handler, live while Labs is open
+let modalVideoIO: IntersectionObserver | null = null;   // lazy-plays case-study videos in view
 
-/* Looping, muted, inline local video (used by case-study lead + blocks). */
+/* Looping, muted, inline local video (used by case-study blocks). Marked
+   data-lazy: no src + preload="none" up front, so nothing downloads until
+   it scrolls near the viewport (see setupLazyVideos). Keeps video-heavy
+   pages like AIGA from loading a dozen films at once. */
 const loopVideo = (src: string, cls: string, label: string): string =>
-  `<video class="${cls}" src="${src}" autoplay muted loop playsinline preload="metadata" aria-label="${label}"></video>`;
+  `<video class="${cls}" data-src="${src}" data-lazy muted loop playsinline preload="none" aria-label="${label}"></video>`;
 
 /* Rich studio-style case study (only when project.study is present). */
 function renderStudy(p: Project): string {
@@ -342,9 +346,10 @@ function renderStudy(p: Project): string {
         return `<figure class="case__media">${body}${b.cap ? `<figcaption class="case__cap caption">${b.cap}</figcaption>` : ''}</figure>`;
       }
       case 'video': {
-        // controls:true lets the viewer unmute / scrub; still autoplays muted + loops.
+        // controls:true lets the viewer unmute / scrub; plays muted + loops.
+        // Lazy (data-lazy): loads/plays only when scrolled near view.
         const ctrl = b.controls ? ' controls' : '';
-        const vid = `<video class="case__video" src="${b.src}" autoplay muted loop playsinline preload="metadata"${ctrl} aria-label="${p.title} — ${p.client}"></video>`;
+        const vid = `<video class="case__video" data-src="${b.src}" data-lazy muted loop playsinline preload="none"${ctrl} aria-label="${p.title} — ${p.client}"></video>`;
         return `<figure class="case__media">${vid}${b.cap ? `<figcaption class="case__cap caption">${b.cap}</figcaption>` : ''}</figure>`;
       }
       case 'grid': {
@@ -376,9 +381,32 @@ function renderStudy(p: Project): string {
     <dl class="case__credits">${credits}</dl>`;
 }
 
+/* Lazy-load case-study videos: assign the real src and play only when a
+   video scrolls near the viewport, and pause it once it leaves. A single
+   shared observer per open keeps at most a couple of films decoding at
+   once instead of the whole page. */
+function setupLazyVideos() {
+  modalVideoIO?.disconnect();
+  const vids = [...modalInner.querySelectorAll<HTMLVideoElement>('video[data-lazy]')];
+  if (!vids.length) return;
+  modalVideoIO = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      const v = e.target as HTMLVideoElement;
+      if (e.isIntersecting) {
+        if (!v.src && v.dataset.src) v.src = v.dataset.src;   // download on demand
+        if (!reducedMotion) v.play().catch(() => {});
+      } else {
+        v.pause();
+      }
+    });
+  }, { rootMargin: '300px 0px' });   // warm up just before they enter view
+  vids.forEach((v) => modalVideoIO!.observe(v));
+}
+
 function openModal(p: Project) {
   if (p.study) {
     modalInner.innerHTML = renderStudy(p);
+    setupLazyVideos();
     modal.hidden = false;
     modal.scrollTop = 0;
     document.body.style.overflow = 'hidden';
@@ -410,6 +438,7 @@ function openModal(p: Project) {
 }
 function closeModal() {
   modal.hidden = true;
+  modalVideoIO?.disconnect(); modalVideoIO = null;   // stop watching/playing videos
   modalInner.innerHTML = '';       // stops any playing iframe
   document.body.style.overflow = '';
   if (labsResize) { window.removeEventListener('resize', labsResize); labsResize = null; }
