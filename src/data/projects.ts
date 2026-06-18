@@ -389,7 +389,7 @@ export const site = {
   // Names only — keep this ruthlessly true. Add a name only once it's confirmed.
   clients: 'BMW · BBC · Al Jazeera · Xbox · Squarespace · AT&T · Hulu · Faraday · M83 · FootJoy · Dodge · Samsung · AIGA',
   about:
-    'I’m Kenneth — director and designer in LA. Fifteen-ish years making things move: broadcast IDs, title sequences, 3D, installations you can stand under. AT&T, BBC, Hulu, FX, Xbox — a few of the logos along the way. One frame or a whole campaign, same obsession: hands dirty, every detail sweated, nothing out the door till it’s right. And when the technique doesn’t exist yet? I build it.',
+    'I’m Kenneth, a designer and director in LA. I’ve spent about fifteen years making things move — mostly motion and 3D, with the occasional piece big enough to walk right up to. The part I love is when a rough idea finally clicks; I’ll happily lose a weekend chasing that. I care a lot about the work, but I don’t take myself too seriously, and I’m an easy person to make things with. If you’ve got something you’re trying to figure out, let’s talk.',
 };
 
 /* ---- Labs — experimental / self-initiated work --------------
