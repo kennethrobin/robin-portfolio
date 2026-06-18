@@ -346,9 +346,10 @@ function renderStudy(p: Project): string {
         return `<figure class="case__media">${body}${b.cap ? `<figcaption class="case__cap caption">${b.cap}</figcaption>` : ''}</figure>`;
       }
       case 'video': {
-        // controls:true lets the viewer unmute / scrub; plays muted + loops.
-        // Lazy (data-lazy): loads/plays only when scrolled near view.
-        const ctrl = b.controls ? ' controls' : '';
+        // controls:true → the viewer can unmute / scrub, but the controls
+        // stay hidden until they hover (see setupHoverControls), so there's
+        // no unmute bar sitting on the clip. Lazy: loads only when near view.
+        const ctrl = b.controls ? ' data-hovercontrols' : '';
         const vid = `<video class="case__video" data-src="${b.src}" data-lazy muted loop playsinline preload="none"${ctrl} aria-label="${p.title} — ${p.client}"></video>`;
         return `<figure class="case__media">${vid}${b.cap ? `<figcaption class="case__cap caption">${b.cap}</figcaption>` : ''}</figure>`;
       }
@@ -366,12 +367,13 @@ function renderStudy(p: Project): string {
   const credits = s.credits
     .map((c) => `<div class="case__credit"><dt>${c.role}</dt><dd>${c.name}</dd></div>`)
     .join('');
-  // Lead film: a remote embed (Vimeo) plays in an iframe; a local
-  // file plays as a muted, looping inline video (with controls when
-  // leadControls is set, so the viewer can unmute / scrub).
+  // Lead film: a remote embed (Vimeo) plays in an iframe; a local file
+  // plays as a muted, looping inline video. When leadControls is set, the
+  // viewer can unmute / scrub — but the controls only appear on hover
+  // (see setupHoverControls), so no unmute bar sits on the film.
   const lead = /^https?:/.test(s.lead)
     ? `<iframe class="case__lead case__lead--embed" src="${s.lead}?autoplay=1&muted=1&loop=1&title=0&byline=0" allow="autoplay; fullscreen" title="${p.title} — ${p.client}"></iframe>`
-    : `<video class="case__lead" src="${s.lead}" autoplay muted loop playsinline preload="metadata"${s.leadControls ? ' controls' : ''} aria-label="${p.title} — ${p.client}"></video>`;
+    : `<video class="case__lead" src="${s.lead}" autoplay muted loop playsinline preload="metadata"${s.leadControls ? ' data-hovercontrols' : ''} aria-label="${p.title} — ${p.client}"></video>`;
   return `
     ${lead}
     <div class="modal__meta caption"><span>${p.client}</span><span>${p.year}</span><span>${p.role}</span></div>
@@ -403,10 +405,21 @@ function setupLazyVideos() {
   vids.forEach((v) => modalVideoIO!.observe(v));
 }
 
+/* Reveal native video controls (so the viewer can unmute / scrub) only
+   while the pointer is over the video, so there's no unmute button sitting
+   on every clip by default. */
+function setupHoverControls() {
+  modalInner.querySelectorAll<HTMLVideoElement>('video[data-hovercontrols]').forEach((v) => {
+    v.addEventListener('pointerenter', () => { v.controls = true; });
+    v.addEventListener('pointerleave', () => { v.controls = false; });
+  });
+}
+
 function openModal(p: Project) {
   if (p.study) {
     modalInner.innerHTML = renderStudy(p);
     setupLazyVideos();
+    setupHoverControls();
     modal.hidden = false;
     modal.scrollTop = 0;
     document.body.style.overflow = 'hidden';
