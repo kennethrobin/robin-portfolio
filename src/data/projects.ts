@@ -137,9 +137,9 @@ export const projects: Project[] = [
     study: {
       lead: 'https://player.vimeo.com/video/480136521',
       intro: [
-        'In 2018 BBC Two unveiled its first new identity in twenty years, retiring two decades of “2” idents for a single unifying idea: the curve of the numeral, reinterpreted by a roster of artists and studios. The system was built by the BBC’s in-house agency, BBC Creative, with UK brand agency Superunion — and I was one of the artists they commissioned to make an ident within it.',
-        'My brief was to take that iconic curve and make it my own: a short, self-contained world that reads instantly as BBC Two while standing apart from the other films in the launch package. I designed and animated it as a visceral material study — treating the “2” as something alive, tactile and organic rather than graphic, with surface and light doing the work.',
-        'The idents were built to be iterative — refreshed and expanded over time — and tied together by composer Alex Baranowski’s evolving two-note sound signature. Sharing the launch lineup with studios like Aardman, The Mill and FutureDeluxe was a genuine privilege, and the work rolled out across broadcast and digital from the September 2018 launch.',
+        'In 2018 BBC Two unveiled its first new identity in twenty years, retiring two decades of “2” idents for a single unifying idea: the curve of the numeral, reimagined as a new family of channel idents. I was commissioned to design and animate one of the launch idents.',
+        'My brief was to take that iconic curve and make it my own: a short, self-contained world that reads instantly as BBC Two while standing entirely on its own. I designed and animated it as a visceral material study — treating the “2” as something alive, tactile and organic rather than graphic, with surface and light doing the work.',
+        'The idents were built to be iterative — refreshed and expanded over time — and tied together by an evolving two-note sound signature. The work rolled out across broadcast and digital from the September 2018 launch.',
       ],
       blocks: [],
       credits: [
