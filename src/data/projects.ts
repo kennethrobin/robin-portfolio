@@ -389,7 +389,7 @@ export const site = {
   // Names only — keep this ruthlessly true. Add a name only once it's confirmed.
   clients: 'BMW · BBC · Al Jazeera · Xbox · Squarespace · AT&T · Hulu · Faraday · M83 · FootJoy · Dodge · Samsung · AIGA',
   about:
-    'I’m Kenneth Robin, a director and designer in Los Angeles. For over 15 years I’ve shaped motion for ambitious brands — broadcast identities, title sequences, 3D films and experiences built at architectural scale, for the likes of AT&T, BBC, Hulu, FX and Xbox. From a single frame to a full campaign, the work gets the same obsession: a sharp point of view, the craft to back it, and a refusal to ship anything that isn’t undeniable. And when the technique doesn’t exist yet, I build it.',
+    'Hey — I’m Kenneth, a director and designer in LA. I’ve spent 15+ years making motion for brands that actually want to say something: broadcast identities, title sequences, 3D, and big installations you can stand under. AT&T, BBC, Hulu, FX, Xbox — a few of the names along the way. One frame or a whole campaign, I sweat it the same. And if the technique doesn’t exist yet, I’ll go build it.',
 };
 
 /* ---- Labs — experimental / self-initiated work --------------
