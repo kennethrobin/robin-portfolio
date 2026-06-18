@@ -367,16 +367,27 @@ export const projects: Project[] = [
   },
   {
     slug: 'squarespace',
-    title: 'Hip Hop Project',
+    title: 'Hip Hop Bumper',
     client: 'Squarespace',
-    year: '2016',
+    year: '2014',
     role: 'Design, Animation',
     blurb:
-      'Brand-film design for Squarespace’s Hip Hop Project campaign.',
+      'A short, high-energy brand bumper designed and animated for Squarespace.',
     media: m('squarespace', 1),
     video: 'https://player.vimeo.com/video/154650574',
     tone: '#0d0d10',
-    hidden: true,
+    study: {
+      lead: 'https://player.vimeo.com/video/154650574',
+      intro: [
+        'A short bumper I designed and animated for Squarespace — a quick, high-energy open with a hip hop pulse.',
+        'Nothing precious: bold type, tight timing and a few clean moves, built to grab attention in a couple of seconds and hand off to whatever comes next.',
+      ],
+      blocks: [],
+      credits: [
+        { role: 'Design & Animation', name: 'Kenneth Robin' },
+        { role: 'Client', name: 'Squarespace' },
+      ],
+    },
   },
 ];
 
