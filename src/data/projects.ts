@@ -194,7 +194,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'hip-hop-uncovered',
-    title: 'Hip Hop Uncovered',
+    title: 'FX Hip Hop Uncovered',
     client: 'FX',
     year: '2021',
     role: 'Broadcast Design, Animation',
