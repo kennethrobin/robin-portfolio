@@ -282,7 +282,7 @@ worklist.innerHTML = projects
   <li>
     <button class="workrow" data-i="${i}" aria-haspopup="dialog">
       <span class="workrow__title">${p.title}</span>
-      <span class="workrow__meta">${p.client} — ${p.year}</span>
+      <span class="workrow__meta">${p.client}</span>
     </button>
   </li>`).join('');
 
