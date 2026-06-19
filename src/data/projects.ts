@@ -404,7 +404,7 @@ export const site = {
   skills: [
     { group: 'Direction & Design', items: ['Creative Direction', 'Art Direction', 'Motion Design', 'Broadcast & Title Design', 'Experiential / Large-format'] },
     { group: '3D & Motion', items: ['Cinema 4D', 'Redshift', 'X-Particles', 'MoGraph', 'After Effects'] },
-    { group: 'AI & Generative', items: ['Higgsfield', 'KREA', 'Weavy', 'Image Generation', 'AI Video', 'AI Workflows & Pipelines'] },
+    { group: 'AI & Generative', items: ['Higgsfield', 'KREA', 'Figma Weave', 'Midjourney', 'Luma', 'Image Generation', 'AI Video', 'AI Workflows & Pipelines'] },
     { group: 'Development & Tooling', items: ['Python & C++ (C4D SDK)', 'After Effects Scripting', 'MCP for Cinema 4D', 'Claude', 'Warp'] },
   ],
 };
