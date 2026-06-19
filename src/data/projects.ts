@@ -399,7 +399,7 @@ export const site = {
   // Names only — keep this ruthlessly true. Add a name only once it's confirmed.
   clients: 'BMW · BBC · Al Jazeera · Xbox · Squarespace · AT&T · Hulu · Faraday · M83 · FootJoy · Dodge · Samsung · AIGA',
   about:
-    'I’m Kenneth — designer and director in LA. Twenty years making things move, mostly motion and 3D. I’m comfortable in agile design workflows — moving fast without letting the craft get sloppy.',
+    'I’m Kenneth — designer and director in LA. Twenty years making things move, mostly motion and 3D. I’m comfortable in agile design workflows, with a focus on craft.',
   // Itemized skill set shown under the About bio. Edit freely.
   skills: [
     { group: 'Direction & Design', items: ['Creative Direction', 'Art Direction', 'Motion Design', 'Broadcast & Title Design', 'Experiential / Large-format'] },
