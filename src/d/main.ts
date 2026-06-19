@@ -572,6 +572,18 @@ window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hid
 /* ---- Studio copy (single source: projects.ts) ------------------- */
 document.querySelector<HTMLElement>('[data-about]')!.textContent = site.about;
 
+/* ---- Skills & tools, itemized under the bio (from projects.ts) --- */
+const skillsEl = document.querySelector<HTMLElement>('[data-skills]');
+if (skillsEl) {
+  skillsEl.innerHTML = site.skills
+    .map((g) => `
+    <div class="skills__group">
+      <h3 class="skills__h caption">${g.group}</h3>
+      <ul class="skills__list">${g.items.map((it) => `<li>${it}</li>`).join('')}</ul>
+    </div>`)
+    .join('');
+}
+
 /* ---- Pause the video once the hero scrolls away -----------------
    Saves GPU + battery: when the hero is off screen we stop drawing
    the WebGL frame and pause the playing film; both resume on return. */

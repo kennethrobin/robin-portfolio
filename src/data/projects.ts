@@ -400,6 +400,13 @@ export const site = {
   clients: 'BMW · BBC · Al Jazeera · Xbox · Squarespace · AT&T · Hulu · Faraday · M83 · FootJoy · Dodge · Samsung · AIGA',
   about:
     'I’m Kenneth — designer and director in LA. Twenty years making things move, mostly motion and 3D. I chase an idea till it clicks, then push it a little further.',
+  // Itemized skill set shown under the About bio. Edit freely.
+  skills: [
+    { group: 'Direction & Design', items: ['Creative Direction', 'Art Direction', 'Motion Design', 'Broadcast & Title Design', 'Experiential / Large-format'] },
+    { group: '3D & Motion', items: ['Cinema 4D', 'Redshift', 'X-Particles', 'MoGraph', 'After Effects'] },
+    { group: 'AI & Generative', items: ['Higgsfield', 'KREA', 'Weavy', 'Image Generation', 'AI Video', 'AI Workflows & Pipelines'] },
+    { group: 'Development & Tooling', items: ['Python & C++ (C4D SDK)', 'After Effects Scripting', 'MCP for Cinema 4D', 'Claude', 'Warp'] },
+  ],
 };
 
 /* ---- Labs — experimental / self-initiated work --------------
