@@ -372,7 +372,7 @@ function renderStudy(p: Project): string {
   // viewer can unmute / scrub — but the controls only appear on hover
   // (see setupHoverControls), so no unmute bar sits on the film.
   const lead = /^https?:/.test(s.lead)
-    ? `<iframe class="case__lead case__lead--embed" src="${s.lead}?autoplay=1&muted=1&loop=1&title=0&byline=0" allow="autoplay; fullscreen" title="${p.title} — ${p.client}"></iframe>`
+    ? `<iframe class="case__lead case__lead--embed" src="${s.lead}?autoplay=1&muted=1&loop=1&controls=0&title=0&byline=0" allow="autoplay; fullscreen" title="${p.title} — ${p.client}"></iframe>`
     : `<video class="case__lead" src="${s.lead}" autoplay muted loop playsinline preload="metadata"${s.leadControls ? ' data-hovercontrols' : ''} aria-label="${p.title} — ${p.client}"></video>`;
   return `
     ${lead}
@@ -430,7 +430,7 @@ function openModal(p: Project) {
     return;
   }
   const lead = p.video
-    ? `<iframe class="modal__video" src="${p.video}?autoplay=1&muted=1&loop=1&title=0&byline=0" allow="autoplay; fullscreen" title="${p.title}"></iframe>`
+    ? `<iframe class="modal__video" src="${p.video}?autoplay=1&muted=1&loop=1&controls=0&title=0&byline=0" allow="autoplay; fullscreen" title="${p.title}"></iframe>`
     : `<div class="modal__media"><img src="${p.media[0]}" alt="${p.title} — ${p.client}" /></div>`;
   const stills = p.media.slice(p.video ? 0 : 1)
     .map((src) => `<div class="modal__media"><img loading="lazy" src="${src}" alt="${p.title} still" /></div>`)
